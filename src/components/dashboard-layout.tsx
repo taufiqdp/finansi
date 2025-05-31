@@ -12,41 +12,38 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import Link from "next/link";
 
 const menuItems = [
   {
     title: "Overview",
     icon: Home,
     id: "overview",
+    path: "/",
   },
   {
     title: "Add Transaction",
     icon: Plus,
     id: "add-transaction",
+    path: "/add-transaction",
   },
   {
     title: "Transaction History",
     icon: History,
     id: "transactions",
+    path: "/history",
   },
 ];
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
 }
 
-export function DashboardLayout({
-  children,
-  activeTab,
-  setActiveTab,
-}: DashboardLayoutProps) {
+export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -72,13 +69,13 @@ export function DashboardLayout({
                 <SidebarMenu>
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.id}>
-                      <SidebarMenuButton
-                        isActive={activeTab === item.id}
-                        onClick={() => setActiveTab(item.id)}
+                      <Link
+                        href={`${item.path}`}
+                        className="flex items-center gap-2 p-2 text-sm font-medium hover:bg-muted/50 rounded-md"
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
-                      </SidebarMenuButton>
+                      </Link>
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>
