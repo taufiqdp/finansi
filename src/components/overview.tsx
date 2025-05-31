@@ -25,7 +25,9 @@ export function Overview({ transactions }: OverviewProps) {
 
   const balance = totalIncome - totalExpenses;
 
-  const recentTransactions = transactions.slice(0, 5);
+  const recentTransactions = transactions
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
 
   return (
     <div className="space-y-6">
