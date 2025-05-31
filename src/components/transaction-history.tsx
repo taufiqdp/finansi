@@ -160,7 +160,7 @@ export function TransactionHistory({
                         }`}
                       >
                         {transaction.type === "income" ? "+" : "-"}$
-                        {transaction.amount.toLocaleString()}
+                        {transaction.amount.toLocaleString("en-US")}
                       </p>
                     </div>
 

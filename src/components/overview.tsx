@@ -41,7 +41,7 @@ export function Overview({ transactions }: OverviewProps) {
                 balance >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              ${balance.toLocaleString()}
+              ${balance.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
               {balance >= 0 ? "Positive balance" : "Negative balance"}
@@ -56,7 +56,7 @@ export function Overview({ transactions }: OverviewProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${totalIncome.toLocaleString()}
+              ${totalIncome.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
               From {transactions.filter((t) => t.type === "income").length}{" "}
@@ -74,7 +74,7 @@ export function Overview({ transactions }: OverviewProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              ${totalExpenses.toLocaleString()}
+              ${totalExpenses.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
               From {transactions.filter((t) => t.type === "expense").length}{" "}
@@ -141,7 +141,7 @@ export function Overview({ transactions }: OverviewProps) {
                     }`}
                   >
                     {transaction.type === "income" ? "+" : "-"}$
-                    {transaction.amount.toLocaleString()}
+                    {transaction.amount.toLocaleString("en-US")}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {transaction.date}
