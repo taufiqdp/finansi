@@ -1,19 +1,18 @@
-import { resolve } from "node:path";
 import { config } from "dotenv";
 config();
 
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import postgres from "postgres";
 import { transactionsTable } from "./schema";
 
-// Connect to the database
-const sqlite = new Database("local.db");
-const db = drizzle(sqlite);
+// Connect to Supabase PostgreSQL database
+const sql = postgres(process.env.DATABASE_URL!);
+const db = drizzle(sql);
 
 // Run migrations if needed
 const migrateDb = async () => {
-  migrate(db, { migrationsFolder: resolve(__dirname, "migrations") });
+  await migrate(db, { migrationsFolder: "./drizzle" });
   console.log("Migrations completed");
 };
 
@@ -111,7 +110,7 @@ const main = async () => {
     console.error("Error seeding database:", error);
     process.exit(1);
   } finally {
-    sqlite.close();
+    await sql.end();
   }
 };
 
