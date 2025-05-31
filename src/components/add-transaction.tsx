@@ -22,10 +22,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
-import type { Transaction } from "@/app/page";
+import type { Transaction } from "@/db/schema";
 
 interface AddTransactionProps {
-  onAddTransaction: (transaction: Omit<Transaction, "id">) => void;
+  onAddTransaction: (
+    transaction: Omit<Transaction, "id" | "createdAt">
+  ) => void;
 }
 
 const incomeCategories = [
@@ -82,7 +84,7 @@ export function AddTransaction({ onAddTransaction }: AddTransactionProps) {
   const categories = type === "income" ? incomeCategories : expenseCategories;
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -166,6 +168,7 @@ export function AddTransaction({ onAddTransaction }: AddTransactionProps) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
+                className="h-32"
               />
             </div>
 

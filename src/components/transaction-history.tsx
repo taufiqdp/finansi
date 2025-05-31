@@ -19,11 +19,11 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Search, TrendingUp, TrendingDown } from "lucide-react";
-import type { Transaction } from "@/app/page";
+import type { Transaction } from "@/db/schema";
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
-  onDeleteTransaction: (id: string) => void;
+  onDeleteTransaction: (id: number) => void;
 }
 
 export function TransactionHistory({

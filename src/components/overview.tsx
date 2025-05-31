@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-react";
-import type { Transaction } from "@/app/page";
+import type { Transaction } from "@/db/schema";
 
 interface OverviewProps {
   transactions: Transaction[];
