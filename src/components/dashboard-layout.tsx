@@ -100,7 +100,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         <main className="flex-1 flex flex-col">
           <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6">
-            <SidebarTrigger />
+            <SidebarTrigger className="hover:cursor-pointer" />
             <h1 className="text-lg font-semibold">Financial Dashboard</h1>
           </header>
 
