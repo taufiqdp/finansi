@@ -1,8 +1,8 @@
-
 from dotenv import load_dotenv
 from google.adk.agents import Agent
-from financial_agent.tools import execute_sql_query
+
 from financial_agent.prompt import INSTRUCTION
+from financial_agent.tools import execute_sql_query
 
 load_dotenv()
 
@@ -15,5 +15,3 @@ root_agent = Agent(
     ],
     instruction=INSTRUCTION,
 )
-
-
