@@ -99,12 +99,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col">
-          <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6">
+          <header className="fixed top-0 right-0 left-0 ml-[var(--sidebar-width)] z-10 flex h-14 items-center gap-4 border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <SidebarTrigger className="hover:cursor-pointer" />
             <h1 className="text-lg font-semibold">Financial Dashboard</h1>
           </header>
 
-          <div className="flex-1 p-6">{children}</div>
+          <div className="flex-1 p-6 mt-14">{children}</div>
         </main>
       </div>
     </SidebarProvider>
