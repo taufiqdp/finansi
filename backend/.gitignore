@@ -63,3 +63,4 @@ environment.yml
 conda-meta/
 
 .env
+.dump/
