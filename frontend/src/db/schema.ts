@@ -2,6 +2,7 @@ import { integer, pgTable, text } from "drizzle-orm/pg-core";
 
 export const transactionsTable = pgTable("transactions_table", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: integer("user_id").notNull(),
   type: text("type", {
     enum: ["income", "expense"],
   }).notNull(),
