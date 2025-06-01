@@ -10,7 +10,7 @@ from google.adk.runners import Runner
 from google.adk.sessions import DatabaseSessionService
 from google.genai import types
 
-from financial_agent.agent import root_agent
+from financial_agent.agent import get_agent
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -31,6 +31,7 @@ session_service = DatabaseSessionService(db_url=DATABASE_URL)
 
 @router.post("/run")
 async def agent_run(req: AgentRunRequest) -> Union[List[Event], StreamingResponse]:
+    root_agent = get_agent(user_id=req.user_id)
     runner = Runner(
         app_name=APP_NAME, agent=root_agent, session_service=session_service
     )
