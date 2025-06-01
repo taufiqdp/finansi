@@ -69,3 +69,39 @@ def execute_sql_query(sql_query: str) -> List[Dict[str, Any]]:
         return [{"error": f"Database error: {str(e)}"}]
     except Exception as e:
         return [{"error": f"Unexpected error: {str(e)}"}]
+
+
+def get_balance(user_id: int) -> Dict[str, Any]:
+    """
+    Get the balance for a specific user by summing their income and expenses.
+
+    Args:
+        user_id (int): The ID of the user
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the user's balance
+    """
+    sql_query = f"""
+    SELECT
+        SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS total_income,
+        SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS total_expense
+    FROM transactions_table
+    WHERE user_id = {user_id};
+    """
+
+    result = execute_sql_query(sql_query)
+
+    if "error" in result[0]:
+        return result[0]
+
+    total_income = result[0].get("total_income", 0)
+    total_expense = result[0].get("total_expense", 0)
+
+    balance = total_income - total_expense
+
+    return {
+        "user_id": user_id,
+        "balance": balance,
+        "total_income": total_income,
+        "total_expense": total_expense,
+    }

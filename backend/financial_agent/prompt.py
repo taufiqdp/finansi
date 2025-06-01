@@ -1,7 +1,10 @@
 import datetime
 
+
 def get_prompt(user_id: int) -> str:
-    current_datetime = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7)))
+    current_datetime = datetime.datetime.now(
+        datetime.timezone(datetime.timedelta(hours=7))
+    )
     today_date_iso = current_datetime.date().isoformat()
     today_datetime_iso = current_datetime.isoformat()
 
@@ -53,6 +56,20 @@ When a new conversation starts or if a user simply initiates interaction, greet 
             UPDATE transactions_table SET <column> = <new_value>, ... WHERE <condition> AND user_id = {user_id};
             ```
             Always use `WHERE` to avoid unintended updates, preferably `id` and always `user_id = {user_id}`.
+
+* `get_balance(user_id: int)`: Retrieves the current balance for the specified user.
+    * **Purpose:** Use this tool when the user asks about their balance, wants to know how much money they have, or when providing financial summaries that would benefit from balance information.
+    * **Usage:** Call `get_balance({user_id})` with the current user's ID. Always use the same `user_id` value that's used for database queries.
+    * **Returns:** A dictionary containing:
+        * `balance`: The net balance (total income - total expenses)
+        * `total_income`: Sum of all income transactions
+        * `total_expense`: Sum of all expense transactions
+        * `user_id`: The user ID for confirmation
+    * **Examples of when to use:**
+        * User asks: "What's my balance?" or "How much money do I have?"
+        * User asks: "Can I afford to spend $100?" (get balance first, then advise)
+        * Providing spending summaries where balance context would be helpful
+        * User asks about their financial status or overview
 
 **Constraints & Guidelines:**
 
