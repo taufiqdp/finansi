@@ -1,8 +1,7 @@
 import datetime
 import os
-from contextlib import contextmanager
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import psycopg2
 from dotenv import load_dotenv
@@ -34,18 +33,18 @@ def execute_sql_query(sql_query: str) -> List[Dict[str, Any]]:
         params (tuple, optional): Parameters for the SQL query to prevent SQL injection
 
     Returns:
-        List[Dict[str, Any]]: Query results as a list of dictionaries
-
-    Raises:
-        psycopg2.Error: If there's a database connection or query error
-        ValueError: If the query is invalid or empty
+        List[Dict[str, Any]]: Query results as a list of dictionaries or error message
     """
     if not sql_query or not sql_query.strip():
-        raise ValueError("SQL query cannot be empty")
+        return [{"error": "SQL query cannot be empty"}]
+
+    # Check if query contains 'transactions_table'
+    if "transactions_table" not in sql_query.lower():
+        return [{"error": "Query must reference 'transactions_table'"}]
 
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
-        raise ValueError("DATABASE_URL environment variable is not set")
+        return [{"error": "DATABASE_URL environment variable is not set"}]
 
     try:
         with psycopg2.connect(database_url, cursor_factory=RealDictCursor) as conn:
@@ -67,40 +66,6 @@ def execute_sql_query(sql_query: str) -> List[Dict[str, Any]]:
                     return [{"success": True, "affected_rows": cursor.rowcount}]
 
     except psycopg2.Error as e:
-        raise psycopg2.Error(f"Database error: {str(e)}")
+        return [{"error": f"Database error: {str(e)}"}]
     except Exception as e:
-        raise Exception(f"Unexpected error: {str(e)}")
-
-
-@contextmanager
-def get_db_connection():
-    """
-    Context manager for database connections.
-    Automatically handles connection cleanup.
-    """
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise ValueError("DATABASE_URL environment variable is not set")
-
-    conn = None
-    try:
-        conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
-        yield conn
-    except psycopg2.Error as e:
-        if conn:
-            conn.rollback()
-        raise psycopg2.Error(f"Database error: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
-
-
-if __name__ == "__main__":
-    # Example usage
-    try:
-        result = execute_sql_query(
-            "SELECT AVG(amount) FROM transactions_table WHERE type = 'income';"
-        )
-        print(result)
-    except Exception as e:
-        print(f"Error: {str(e)}")
+        return [{"error": f"Unexpected error: {str(e)}"}]
