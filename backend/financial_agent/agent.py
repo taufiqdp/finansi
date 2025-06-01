@@ -1,17 +1,20 @@
 from dotenv import load_dotenv
 from google.adk.agents import Agent
+from google.adk.models.lite_llm import LiteLlm
 
-from financial_agent.prompt import INSTRUCTION
+from financial_agent.prompt import get_prompt
 from financial_agent.tools import execute_sql_query
 
 load_dotenv()
 
 
-root_agent = Agent(
-    name="financial_agent",
-    model="gemini-2.0-flash",
-    tools=[
-        execute_sql_query,
-    ],
-    instruction=INSTRUCTION,
-)
+def get_agent(user_id: int) -> Agent:
+    return Agent(
+        name="financial_agent",
+        model=LiteLlm(model="azure/gpt-4o-mini"),
+        tools=[execute_sql_query],
+        instruction=get_prompt(user_id=user_id),
+    )
+
+
+root_agent = get_agent(user_id=1)  # For testing purposes
