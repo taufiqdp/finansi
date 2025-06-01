@@ -3,7 +3,7 @@
 import { TransactionHistory } from "@/components/transaction-history";
 import {
   deleteTransaction as deleteTransactionAction,
-  getAllTransactions,
+  getTransactionsByUserId,
 } from "@/app/actions";
 import { useEffect, useState } from "react";
 import { Transaction } from "@/db/schema";
@@ -16,7 +16,7 @@ export default function HistoryPage() {
     const fetchTransactions = async () => {
       try {
         setIsLoading(true);
-        const data = await getAllTransactions();
+        const data = await getTransactionsByUserId(1); // Replace with actual user ID logic
         setTransactions(data);
       } catch (error) {
         console.error("Failed to fetch transactions:", error);

@@ -26,7 +26,7 @@ import type { Transaction } from "@/db/schema";
 
 interface AddTransactionProps {
   onAddTransaction: (
-    transaction: Omit<Transaction, "id" | "createdAt">
+    transaction: Omit<Transaction, "id" | "createdAt" | "userId">
   ) => void;
 }
 

@@ -7,13 +7,12 @@ import { AddTransaction } from "@/components/add-transaction";
 
 export default function AddTransactionPage() {
   const [isLoading, setIsLoading] = useState(false);
-
   const addTransaction = async (
-    transaction: Omit<Transaction, "id" | "createdAt">
+    transaction: Omit<Transaction, "id" | "createdAt" | "userId">
   ) => {
     try {
       setIsLoading(true);
-      await addTransactionAction(transaction);
+      await addTransactionAction(transaction, 1); // Replace 1 with actual user ID logic
       console.log("Transaction added successfully");
     } catch (error) {
       console.error("Failed to add transaction:", error);

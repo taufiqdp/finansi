@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAllTransactions } from "@/app/actions";
+import { getTransactionsByUserId } from "@/app/actions";
 
 import type { Transaction } from "@/db/schema";
 import { Overview } from "@/components/overview";
@@ -14,7 +14,7 @@ export default function Dashboard() {
     const fetchTransactions = async () => {
       try {
         setIsLoading(true);
-        const data = await getAllTransactions();
+        const data = await getTransactionsByUserId(1); // Replace 1 with actual user ID logic
         setTransactions(data);
       } catch (error) {
         console.error("Failed to fetch transactions:", error);

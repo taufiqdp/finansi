@@ -15,11 +15,23 @@ export async function getAllTransactions(): Promise<Transaction[]> {
   return transactions;
 }
 
+export async function getTransactionsByUserId(
+  userId: number
+): Promise<Transaction[]> {
+  const transactions = await db
+    .select()
+    .from(transactionsTable)
+    .where(eq(transactionsTable.userId, userId));
+  return transactions;
+}
+
 export async function addTransaction(
-  transaction: Omit<Transaction, "id" | "createdAt">
+  transaction: Omit<Transaction, "id" | "createdAt" | "userId">,
+  userId: number
 ): Promise<Transaction> {
   const newTransaction: NewTransaction = {
     ...transaction,
+    userId,
   };
 
   const result = await db
