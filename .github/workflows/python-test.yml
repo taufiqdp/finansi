@@ -3,7 +3,7 @@ name: Python Test
 on: [push]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
@@ -18,5 +18,9 @@ jobs:
       - name: Install Dependencies
         working-directory: ./backend
         run: uv sync && uv sync --dev
-      - name: Run test
+      - name: Lint
+        working-directory: ./backend
+        run: uv run ruff check
+      - name: Run Tests
+        working-directory: ./backend
         run: uv run pytest --cache-clear
