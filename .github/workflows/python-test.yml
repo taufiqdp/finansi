@@ -18,3 +18,5 @@ jobs:
       - name: Install Dependencies
         working-directory: ./backend
         run: uv sync && uv sync --dev
+      - name: Run test
+        run: uv run pytest --cache-clear
