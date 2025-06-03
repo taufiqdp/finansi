@@ -4,6 +4,10 @@ on: [push]
 
 env: 
   TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  AZURE_API_KEY: ${{ secrets.AZURE_API_KEY }}
+  AZURE_API_BASE: ${{ secrets.AZURE_API_BASE }}
+  APP_NAME: ${{ secrets.APP_NAME }}
 
 jobs:
   test:
