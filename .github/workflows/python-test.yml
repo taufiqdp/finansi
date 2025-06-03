@@ -3,7 +3,7 @@ name: Python Test
 on: [push]
 
 env: 
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
 
 jobs:
   test:
