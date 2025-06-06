@@ -8,7 +8,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-react";
-import type { Transaction } from "@/db/schema";
+
+export type Transaction = {
+  id: string;
+  type: "income" | "expense";
+  amount: number;
+  category: string;
+  description: string;
+  date: string;
+};
 
 interface OverviewProps {
   transactions: Transaction[];
@@ -43,7 +51,7 @@ export function Overview({ transactions }: OverviewProps) {
                 balance >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              ${balance.toLocaleString("en-US")}
+              {balance}
             </div>
             <p className="text-xs text-muted-foreground">
               {balance >= 0 ? "Positive balance" : "Negative balance"}
@@ -58,7 +66,7 @@ export function Overview({ transactions }: OverviewProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${totalIncome.toLocaleString("en-US")}
+              {totalIncome}
             </div>
             <p className="text-xs text-muted-foreground">
               From {transactions.filter((t) => t.type === "income").length}{" "}
@@ -76,7 +84,7 @@ export function Overview({ transactions }: OverviewProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              ${totalExpenses.toLocaleString("en-US")}
+              {totalExpenses}
             </div>
             <p className="text-xs text-muted-foreground">
               From {transactions.filter((t) => t.type === "expense").length}{" "}
@@ -142,8 +150,8 @@ export function Overview({ transactions }: OverviewProps) {
                         : "text-red-600"
                     }`}
                   >
-                    {transaction.type === "income" ? "+" : "-"}$
-                    {transaction.amount.toLocaleString("en-US")}
+                    {transaction.type === "income" ? "+" : "-"}
+                    {transaction.amount}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {transaction.date}
