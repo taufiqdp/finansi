@@ -3,12 +3,13 @@ import os
 from dotenv import load_dotenv
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
+from google.adk.agents.run_config import RunConfig, StreamingMode
 from google.adk.cli.utils.common import BaseModel
 from google.adk.runners import Runner
 from google.adk.sessions import DatabaseSessionService
 from google.genai import types
 
-from financial_agent.agent import get_agent
+from agent.agent import get_agent
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -19,11 +20,10 @@ class AgentRunRequest(BaseModel):
     user_id: str
     session_id: str
     new_message: types.Content
-    streaming: bool = False
+    streaming: bool = True
 
 
 router = APIRouter()
-
 session_service = DatabaseSessionService(db_url=DATABASE_URL)
 
 
@@ -44,18 +44,17 @@ async def agent_run(req: AgentRunRequest):
         )
 
     if req.streaming:
+        config = RunConfig(streaming_mode=StreamingMode.SSE)
 
         async def event_generator():
-            try:
-                async for event in runner.run_async(
-                    user_id=req.user_id,
-                    session_id=req.session_id,
-                    new_message=req.new_message,
-                ):
-                    sse_event = event.model_dump_json(exclude_none=True, by_alias=True)
-                    yield f"data: {sse_event}\n\n"
-            except Exception as e:
-                yield [f"data: {{'error': '{str(e)}'}}\n\n"]
+            async for event in runner.run_async(
+                user_id=req.user_id,
+                session_id=req.session_id,
+                new_message=req.new_message,
+                run_config=config,
+            ):
+                sse_event = event.model_dump_json(exclude_none=True, by_alias=True)
+                yield f"data: {sse_event}\n\n"
 
         return StreamingResponse(
             event_generator(),
@@ -63,16 +62,14 @@ async def agent_run(req: AgentRunRequest):
         )
 
     else:
-        try:
-            events = [
-                event
-                async for event in runner.run_async(
-                    session_id=req.session_id,
-                    user_id=req.user_id,
-                    new_message=req.new_message,
-                )
-            ]
 
-            return events
-        except Exception as e:
-            return [{"error": str(e)}]
+        events = [
+            event
+            async for event in runner.run_async(
+                user_id=req.user_id,
+                session_id=req.session_id,
+                new_message=req.new_message,
+            )
+        ]
+
+        return events
