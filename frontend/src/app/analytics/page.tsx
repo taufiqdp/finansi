@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, DollarSign, PieChart } from "lucide-react";
 
 import {
@@ -10,12 +13,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import Sidebar from "@/components/sidebar";
-import { getAllTransactions, Transaction } from "@/lib/actions";
+import { getTransactionsByUserId, Transaction } from "@/lib/actions";
+import Loading from "@/components/loading";
 
-// Force dynamic rendering
-export const dynamic = "force-dynamic";
-
-// Format currency
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -24,11 +24,26 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export default async function AnalyticsPage() {
-  // Fetch real transactions from API
-  const transactions: Transaction[] = await getAllTransactions();
+export default function AnalyticsPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Calculate summary data from real transactions
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        const data = await getTransactionsByUserId(1);
+        setTransactions(data);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
   const totalIncome = transactions
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);
@@ -38,7 +53,6 @@ export default async function AnalyticsPage() {
   const netBalance = totalIncome - totalExpenses;
   const savingsRate = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0;
 
-  // Group expenses by category
   const expensesByCategory = transactions
     .filter((t) => t.type === "expense")
     .reduce((acc, t) => {
@@ -46,7 +60,6 @@ export default async function AnalyticsPage() {
       return acc;
     }, {} as Record<string, number>);
 
-  // Group income by category
   const incomeByCategory = transactions
     .filter((t) => t.type === "income")
     .reduce((acc, t) => {
@@ -54,17 +67,42 @@ export default async function AnalyticsPage() {
       return acc;
     }, {} as Record<string, number>);
 
+  if (loading) {
+    return (
+      <Sidebar
+        header="Analitik Keuangan"
+        description="Pantau kesehatan keuangan Anda"
+      >
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                    <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Loading description="Memuat..." />
+        </div>
+      </Sidebar>
+    );
+  }
+
   return (
     <Sidebar
-      header="Financial Analytics"
-      description="Track your financial health"
+      header="Analitik Keuangan"
+      description="Pantau kesehatan keuangan Anda"
     >
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Income
+                Total Pemasukan
               </CardTitle>
               <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
@@ -73,7 +111,7 @@ export default async function AnalyticsPage() {
                 {formatCurrency(totalIncome)}
               </div>
               <p className="text-xs text-muted-foreground">
-                +12% from last month
+                +12% dari bulan lalu
               </p>
             </CardContent>
           </Card>
@@ -81,7 +119,7 @@ export default async function AnalyticsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Expenses
+                Total Pengeluaran
               </CardTitle>
               <TrendingDown className="h-4 w-4 text-red-600" />
             </CardHeader>
@@ -90,14 +128,16 @@ export default async function AnalyticsPage() {
                 {formatCurrency(totalExpenses)}
               </div>
               <p className="text-xs text-muted-foreground">
-                -5% from last month
+                -5% dari bulan lalu
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Net Balance</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Saldo Bersih
+              </CardTitle>
               <DollarSign className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
@@ -109,7 +149,7 @@ export default async function AnalyticsPage() {
                 {formatCurrency(netBalance)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {netBalance >= 0 ? "Positive" : "Negative"} cash flow
+                Arus kas {netBalance >= 0 ? "positif" : "negatif"}
               </p>
             </CardContent>
           </Card>
@@ -117,7 +157,7 @@ export default async function AnalyticsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Savings Rate
+                Tingkat Tabungan
               </CardTitle>
               <PieChart className="h-4 w-4 text-purple-600" />
             </CardHeader>
@@ -133,16 +173,16 @@ export default async function AnalyticsPage() {
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview" className="cursor-pointer">
-              Overview
+              Ringkasan
             </TabsTrigger>
             <TabsTrigger value="expenses" className="cursor-pointer">
-              Expenses
+              Pengeluaran
             </TabsTrigger>
             <TabsTrigger value="income" className="cursor-pointer">
-              Income
+              Pemasukan
             </TabsTrigger>
             <TabsTrigger value="trends" className="cursor-pointer">
-              Trends
+              Tren
             </TabsTrigger>
           </TabsList>
 
@@ -150,13 +190,13 @@ export default async function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Income vs Expenses</CardTitle>
-                  <CardDescription>Monthly comparison</CardDescription>
+                  <CardTitle>Pemasukan vs Pengeluaran</CardTitle>
+                  <CardDescription>Perbandingan bulanan</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Income</span>
+                      <span className="text-sm font-medium">Pemasukan</span>
                       <span className="text-sm text-green-600">
                         {formatCurrency(totalIncome)}
                       </span>
@@ -164,7 +204,7 @@ export default async function AnalyticsPage() {
                     <Progress value={100} className="h-2 bg-green-100" />
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Expenses</span>
+                      <span className="text-sm font-medium">Pengeluaran</span>
                       <span className="text-sm text-red-600">
                         {formatCurrency(totalExpenses)}
                       </span>
@@ -179,8 +219,8 @@ export default async function AnalyticsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Transactions</CardTitle>
-                  <CardDescription>Latest financial activities</CardDescription>
+                  <CardTitle>Transaksi Terbaru</CardTitle>
+                  <CardDescription>Aktivitas keuangan terkini</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -230,8 +270,10 @@ export default async function AnalyticsPage() {
           <TabsContent value="expenses" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Expense Breakdown</CardTitle>
-                <CardDescription>Spending by category</CardDescription>
+                <CardTitle>Rincian Pengeluaran</CardTitle>
+                <CardDescription>
+                  Pengeluaran berdasarkan kategori
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -251,8 +293,8 @@ export default async function AnalyticsPage() {
                           className="h-2"
                         />
                         <div className="text-xs text-muted-foreground">
-                          {((amount / totalExpenses) * 100).toFixed(1)}% of
-                          total expenses
+                          {((amount / totalExpenses) * 100).toFixed(1)}% dari
+                          total pengeluaran
                         </div>
                       </div>
                     )
@@ -265,8 +307,10 @@ export default async function AnalyticsPage() {
           <TabsContent value="income" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Income Sources</CardTitle>
-                <CardDescription>Revenue by category</CardDescription>
+                <CardTitle>Sumber Pemasukan</CardTitle>
+                <CardDescription>
+                  Pendapatan berdasarkan kategori
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -286,8 +330,8 @@ export default async function AnalyticsPage() {
                           className="h-2 bg-green-100"
                         />
                         <div className="text-xs text-muted-foreground">
-                          {((amount / totalIncome) * 100).toFixed(1)}% of total
-                          income
+                          {((amount / totalIncome) * 100).toFixed(1)}% dari
+                          total pemasukan
                         </div>
                       </div>
                     )
@@ -300,32 +344,36 @@ export default async function AnalyticsPage() {
           <TabsContent value="trends" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Financial Health</CardTitle>
-                <CardDescription>Key performance indicators</CardDescription>
+                <CardTitle>Kesehatan Keuangan</CardTitle>
+                <CardDescription>Indikator kinerja utama</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Savings Rate</span>
+                      <span className="text-sm font-medium">
+                        Tingkat Tabungan
+                      </span>
                       <span className="text-sm font-bold">
                         {savingsRate.toFixed(1)}%
                       </span>
                     </div>
                     <Progress value={savingsRate} className="h-2" />
                     <p className="text-xs text-muted-foreground">
+                      Tingkat tabungan{" "}
                       {savingsRate >= 20
-                        ? "Excellent"
+                        ? "sangat baik"
                         : savingsRate >= 10
-                        ? "Good"
-                        : "Needs improvement"}{" "}
-                      savings rate
+                        ? "baik"
+                        : "perlu ditingkatkan"}
                     </p>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Expense Ratio</span>
+                      <span className="text-sm font-medium">
+                        Rasio Pengeluaran
+                      </span>
                       <span className="text-sm font-bold">
                         {((totalExpenses / totalIncome) * 100).toFixed(1)}%
                       </span>
@@ -335,7 +383,7 @@ export default async function AnalyticsPage() {
                       className="h-2"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Percentage of income spent on expenses
+                      Persentase pemasukan yang digunakan untuk pengeluaran
                     </p>
                   </div>
 
@@ -345,7 +393,7 @@ export default async function AnalyticsPage() {
                         {transactions.filter((t) => t.type === "income").length}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Income Transactions
+                        Transaksi Pemasukan
                       </div>
                     </div>
                     <div className="text-center p-4 bg-red-50 rounded-lg">
@@ -356,7 +404,7 @@ export default async function AnalyticsPage() {
                         }
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Expense Transactions
+                        Transaksi Pengeluaran
                       </div>
                     </div>
                   </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardContent,
@@ -37,12 +35,16 @@ export function Overview({ transactions }: OverviewProps) {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
 
+  const formatNumber = (number: number) => {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Saldo</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -51,26 +53,10 @@ export function Overview({ transactions }: OverviewProps) {
                 balance >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              {balance}
+              Rp {formatNumber(balance)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {balance >= 0 ? "Positive balance" : "Negative balance"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {totalIncome}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              From {transactions.filter((t) => t.type === "income").length}{" "}
-              transactions
+              {balance >= 0 ? "Saldo Positif" : "Saldo Negatif"}
             </p>
           </CardContent>
         </Card>
@@ -78,30 +64,48 @@ export function Overview({ transactions }: OverviewProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Expenses
+              Total Pemasukan
             </CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-600" />
+            <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {totalExpenses}
+            <div className="text-2xl font-bold text-green-600">
+              Rp {formatNumber(totalIncome)}
             </div>
             <p className="text-xs text-muted-foreground">
-              From {transactions.filter((t) => t.type === "expense").length}{" "}
-              transactions
+              Dari {transactions.filter((t) => t.type === "income").length}{" "}
+              transaksi
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Pengeluaran
+            </CardTitle>
+            <TrendingDown className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              Rp {formatNumber(totalExpenses)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Dari {transactions.filter((t) => t.type === "expense").length}{" "}
+              transaksi
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Transaksi</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{transactions.length}</div>
             <p className="text-xs text-muted-foreground">
-              Total transactions recorded
+              Total transaksi yang tercatat
             </p>
           </CardContent>
         </Card>
@@ -109,8 +113,8 @@ export function Overview({ transactions }: OverviewProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-          <CardDescription>Your latest financial activities</CardDescription>
+          <CardTitle>Transaksi Terakhir</CardTitle>
+          <CardDescription>Aktivitas keuangan terbaru Anda</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -151,7 +155,7 @@ export function Overview({ transactions }: OverviewProps) {
                     }`}
                   >
                     {transaction.type === "income" ? "+" : "-"}
-                    {transaction.amount}
+                    {formatNumber(transaction.amount)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {transaction.date}

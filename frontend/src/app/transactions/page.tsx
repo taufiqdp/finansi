@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Tag } from "lucide-react";
+import { Plus, Trash2, Tag, ChevronUp, ChevronDown } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -32,14 +32,14 @@ import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import Sidebar from "@/components/sidebar";
 import {
-  getAllTransactions,
   createTransaction,
   deleteTransaction,
+  getTransactionsByUserId,
   Transaction,
 } from "@/lib/actions";
 import AddTransaction from "@/components/add-transaction";
+import Loading from "@/components/loading";
 
-// Format currency
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -53,8 +53,11 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof Transaction | null;
+    direction: "asc" | "desc";
+  }>({ key: "date", direction: "desc" });
 
-  // Form state
   const [formData, setFormData] = useState({
     type: "" as "income" | "expense" | "",
     amount: "",
@@ -63,7 +66,6 @@ export default function TransactionsPage() {
     date: new Date().toISOString().split("T")[0],
   });
 
-  // Fetch transactions on component mount
   useEffect(() => {
     loadTransactions();
   }, []);
@@ -71,7 +73,7 @@ export default function TransactionsPage() {
   const loadTransactions = async () => {
     try {
       setLoading(true);
-      const data = await getAllTransactions();
+      const data = await getTransactionsByUserId(1);
       setTransactions(data);
     } catch (error) {
       console.error("Failed to load transactions:", error);
@@ -79,6 +81,53 @@ export default function TransactionsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSort = (key: keyof Transaction) => {
+    let direction: "asc" | "desc" = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortedTransactions = () => {
+    if (!sortConfig.key) return transactions;
+
+    return [...transactions].sort((a, b) => {
+      const aValue = a[sortConfig.key!];
+      const bValue = b[sortConfig.key!];
+
+      if (sortConfig.key === "date") {
+        const dateA = new Date(aValue as string).getTime();
+        const dateB = new Date(bValue as string).getTime();
+        return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
+      }
+
+      if (sortConfig.key === "amount") {
+        const numA = Number(aValue);
+        const numB = Number(bValue);
+        return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+      }
+
+      const strA = String(aValue).toLowerCase();
+      const strB = String(bValue).toLowerCase();
+
+      if (strA < strB) return sortConfig.direction === "asc" ? -1 : 1;
+      if (strA > strB) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const SortIcon = ({ column }: { column: keyof Transaction }) => {
+    if (sortConfig.key !== column) {
+      return <div className="w-4 h-4" />;
+    }
+    return sortConfig.direction === "asc" ? (
+      <ChevronUp className="w-4 h-4" />
+    ) : (
+      <ChevronDown className="w-4 h-4" />
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,7 +139,7 @@ export default function TransactionsPage() {
       !formData.category ||
       !formData.description
     ) {
-      toast.error("Please fill in all fields");
+      toast.error("Harap isi semua kolom");
       return;
     }
 
@@ -106,9 +155,8 @@ export default function TransactionsPage() {
         date: formData.date,
       });
 
-      toast.success("Transaction added successfully!");
+      toast.success("Transaksi berhasil ditambahkan!");
 
-      // Reset form
       setFormData({
         type: "" as "income" | "expense" | "",
         amount: "",
@@ -121,7 +169,7 @@ export default function TransactionsPage() {
       loadTransactions();
     } catch (error) {
       console.error("Failed to add transaction:", error);
-      toast.error("Failed to add transaction");
+      toast.error("Gagal menambahkan transaksi");
     } finally {
       setIsSubmitting(false);
     }
@@ -130,11 +178,11 @@ export default function TransactionsPage() {
   const handleDelete = async (id: number) => {
     try {
       await deleteTransaction(id);
-      toast.success("Transaction deleted successfully!");
+      toast.success("Transaksi berhasil dihapus!");
       loadTransactions();
     } catch (error) {
       console.error("Failed to delete transaction:", error);
-      toast.error("Failed to delete transaction");
+      toast.error("Gagal menghapus transaksi");
     }
   };
 
@@ -149,16 +197,16 @@ export default function TransactionsPage() {
   return (
     <>
       <Sidebar
-        header="Transactions"
-        description="Manage your income and expenses"
+        header="Transaksi"
+        description="Kelola pemasukan dan pengeluaran Anda"
       >
         <div className="space-y-6">
           {/* Header with Add Button */}
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Transaction History</h2>
+              <h2 className="text-2xl font-bold">Riwayat Transaksi</h2>
               <p className="text-muted-foreground">
-                Track all your financial activities
+                Lacak semua aktivitas keuangan Anda
               </p>
             </div>
 
@@ -166,14 +214,14 @@ export default function TransactionsPage() {
               <DialogTrigger asChild>
                 <Button className="cursor-pointer">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Transaction
+                  Tambah Transaksi
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>Add New Transaction</DialogTitle>
+                  <DialogTitle>Tambah Transaksi Baru</DialogTitle>
                   <DialogDescription>
-                    Enter the details of your transaction below.
+                    Masukkan detail transaksi Anda di bawah ini.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -188,42 +236,79 @@ export default function TransactionsPage() {
             </Dialog>
           </div>
 
-          {/* Transactions Table */}
           <Card>
             <CardHeader>
-              <CardTitle>All Transactions</CardTitle>
+              <CardTitle>Semua Transaksi</CardTitle>
               <CardDescription>
-                {transactions.length} transaction(s) found
+                {transactions.length} transaksi ditemukan
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-
-                  <p>Loading transactions...</p>
-                </div>
+                <Loading description="Memuat transaksi..." />
               ) : transactions.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No transactions found</p>
+                  <p className="text-muted-foreground">
+                    Tidak ada transaksi ditemukan
+                  </p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Add your first transaction to get started
+                    Tambahkan transaksi pertama Anda untuk memulai
                   </p>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort("date")}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Tanggal</span>
+                          <SortIcon column="date" />
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort("type")}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Jenis</span>
+                          <SortIcon column="type" />
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort("category")}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Kategori</span>
+                          <SortIcon column="category" />
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort("description")}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Deskripsi</span>
+                          <SortIcon column="description" />
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="text-right cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort("amount")}
+                      >
+                        <div className="flex items-center justify-end space-x-1">
+                          <span>Jumlah</span>
+                          <SortIcon column="amount" />
+                        </div>
+                      </TableHead>
                       <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {transactions.map((transaction) => (
+                    {getSortedTransactions().map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell className="font-medium">
                           {new Date(transaction.date).toLocaleDateString()}
@@ -236,7 +321,9 @@ export default function TransactionsPage() {
                                 : "destructive"
                             }
                           >
-                            {transaction.type}
+                            {transaction.type === "income"
+                              ? "pemasukan"
+                              : "pengeluaran"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -281,14 +368,3 @@ export default function TransactionsPage() {
     </>
   );
 }
-
-// export default function TransactionsPage() {
-//   return (
-//     <div className="flex items-center justify-center min-h-screen">
-//       <h1 className="text-2xl font-bold">Transactions Page</h1>
-//       <p className="text-muted-foreground mt-2">
-//         This page is under construction.
-//       </p>
-//     </div>
-//   );
-// }

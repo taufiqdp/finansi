@@ -3,11 +3,11 @@ import {
   DollarSign,
   Home,
   PieChart,
-  Plus,
   Bot,
   ChevronRight,
   MessageSquare,
   History,
+  User,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export default function Sidebar({
         <div className="p-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
-            Financial Assistant
+            Asisten Keuangan
           </h2>
         </div>
         <Separator />
@@ -45,7 +45,7 @@ export default function Sidebar({
                 className="w-full justify-start gap-2 hover:cursor-pointer"
               >
                 <Home className="h-4 w-4" />
-                Dashboard
+                Dasboard
               </Button>
             </Link>
             <Link href="/transactions">
@@ -54,7 +54,7 @@ export default function Sidebar({
                 className="w-full justify-start gap-2 hover:cursor-pointer"
               >
                 <CreditCard className="h-4 w-4" />
-                Transactions
+                Transaksi
               </Button>
             </Link>
             <Link href="/analytics">
@@ -63,7 +63,7 @@ export default function Sidebar({
                 className="w-full justify-start gap-2 hover:cursor-pointer"
               >
                 <PieChart className="h-4 w-4" />
-                Analytics
+                Analitik
               </Button>
             </Link>
 
@@ -74,12 +74,12 @@ export default function Sidebar({
                   className="w-full justify-start gap-2 hover:cursor-pointer"
                 >
                   <Bot className="h-4 w-4" />
-                  <span>AI Assistant</span>
+                  <span>Asisten AI</span>
                   <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="ml-4 space-y-1 mt-1">
+                <div className="ml-4 space-y-1 mt-1 border-l-2 border-black/10 pl-1">
                   <Link href="/chat">
                     <Button
                       variant="ghost"
@@ -97,7 +97,7 @@ export default function Sidebar({
                       size="sm"
                     >
                       <History className="h-3 w-3" />
-                      History Chat
+                      Riwayat Chat
                     </Button>
                   </Link>
                 </div>
@@ -108,13 +108,20 @@ export default function Sidebar({
           {/* <Separator className="my-4" /> */}
         </div>
         <div className="p-4">
-          <Link href="/chat/new">
+          <Link href="/profile">
             <Button
-              variant="outline"
-              className="w-full justify-start gap-2 hover:cursor-pointer"
+              variant="ghost"
+              className="w-full justify-start gap-3 hover:cursor-pointer p-3 h-auto"
             >
-              <Plus className="h-4 w-4" />
-              New Chat
+              <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
+                <User className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium">John Doe</span>
+                <span className="text-xs text-muted-foreground">
+                  john@example.com
+                </span>
+              </div>
             </Button>
           </Link>
         </div>

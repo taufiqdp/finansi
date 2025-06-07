@@ -1,6 +1,5 @@
 "use server";
 
-// Define the transaction type based on API response
 export type Transaction = {
   id: number;
   type: "income" | "expense";
@@ -14,11 +13,6 @@ export type Transaction = {
 
 const API_BASE_URL = process.env.API_BASE_URL || "http://127.0.0.1:8000";
 
-/**
- * Fetch transactions by user ID from the backend API
- * @param userId - The ID of the user whose transactions to fetch
- * @returns Promise<Transaction[]> - Array of user transactions
- */
 export async function getTransactionsByUserId(
   userId: number
 ): Promise<Transaction[]> {
@@ -53,11 +47,6 @@ export async function getTransactionsByUserId(
   }
 }
 
-/**
- * Create a new transaction
- * @param transaction - Transaction data to create
- * @returns Promise<Transaction> - The created transaction
- */
 export async function createTransaction(transaction: {
   userId: number;
   type: "income" | "expense";
@@ -90,11 +79,6 @@ export async function createTransaction(transaction: {
   }
 }
 
-/**
- * Delete a transaction by ID
- * @param transactionId - The ID of the transaction to delete
- * @returns Promise<void>
- */
 export async function deleteTransaction(transactionId: number): Promise<void> {
   try {
     const response = await fetch(
@@ -118,20 +102,5 @@ export async function deleteTransaction(transactionId: number): Promise<void> {
   } catch (error) {
     console.error("Error deleting transaction:", error);
     throw new Error("Failed to delete transaction");
-  }
-}
-
-/**
- * Get all transactions (without user filtering)
- * @returns Promise<Transaction[]> - Array of all transactions
- */
-export async function getAllTransactions(): Promise<Transaction[]> {
-  try {
-    // Since the API requires userId, we'll use a default user ID
-    // In a real app, this would be handled differently
-    return await getTransactionsByUserId(1);
-  } catch (error) {
-    console.error("Error fetching all transactions:", error);
-    throw new Error("Failed to fetch transactions");
   }
 }

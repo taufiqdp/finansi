@@ -31,7 +31,6 @@ export default function FinancialChat() {
   const params = useParams();
   const chatId = params.id;
 
-  console.log("Chat ID:", chatId);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -195,7 +194,7 @@ export default function FinancialChat() {
               if (part.text) {
                 assistantMessage = {
                   ...assistantMessage,
-                  content: part.text, // Replace instead of append
+                  content: part.text,
                   loading: false,
                 };
                 setMessages((prev) =>
@@ -211,7 +210,6 @@ export default function FinancialChat() {
         }
       }
 
-      // Ensure final message is not loading
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === loadingId ? { ...msg, loading: false } : msg
@@ -219,13 +217,13 @@ export default function FinancialChat() {
       );
     } catch (error) {
       console.error("Error:", error);
-      // Update the loading message to show error
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === loadingId
             ? {
                 ...msg,
-                content: "Sorry, there was an error processing your request.",
+                content:
+                  "Maaf, terjadi kesalahan saat memproses permintaan Anda.",
                 loading: false,
               }
             : msg
@@ -238,11 +236,10 @@ export default function FinancialChat() {
 
   return (
     <Sidebar
-      header="Financial Assistant"
-      description="Ask about your transactions, budgets, and financial goals"
+      header="Asisten Keuangan"
+      description="Tanyakan tentang transaksi, anggaran, dan tujuan keuangan Anda"
     >
       <div className="flex flex-col h-full overflow-hidden">
-        {/* Messages - Fixed height container with internal scrolling */}
         <div className="flex-1 min-h-0 relative">
           <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
             <div className="p-4">
@@ -280,7 +277,7 @@ export default function FinancialChat() {
                           </div>
                           {message.parts.some((part) => part.functionCall) && (
                             <span className="text-xs">
-                              Running database query...
+                              Menjalankan kueri basis data...
                             </span>
                           )}
                         </div>
@@ -306,7 +303,6 @@ export default function FinancialChat() {
           </ScrollArea>
         </div>
 
-        {/* Input - Fixed at bottom */}
         <div className="p-4 border-t bg-background flex-shrink-0">
           <form
             onSubmit={handleSubmit}
@@ -315,7 +311,7 @@ export default function FinancialChat() {
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about your finances..."
+              placeholder="Tanyakan tentang keuangan Anda..."
               className="min-h-[50px] max-h-32 resize-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -331,7 +327,7 @@ export default function FinancialChat() {
               className="flex-shrink-0"
             >
               <Send className="h-4 w-4" />
-              <span className="sr-only">Send</span>
+              <span className="sr-only">Kirim</span>
             </Button>
           </form>
         </div>

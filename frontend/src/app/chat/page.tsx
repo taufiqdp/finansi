@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import Sidebar from "@/components/sidebar";
+import Loading from "@/components/loading";
 
 export default function ChatPage() {
   const router = useRouter();
@@ -16,15 +17,10 @@ export default function ChatPage() {
 
   return (
     <Sidebar
-      header="Financial Assistant"
-      description="Ask about your transactions, budgets, and financial goals"
+      header="Asisten Keuangan"
+      description="Tanyakan tentang transaksi, anggaran, dan tujuan keuangan Anda"
     >
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Creating new chat session...</p>
-        </div>
-      </div>
+      <Loading description="Memuat..." />
     </Sidebar>
   );
 }

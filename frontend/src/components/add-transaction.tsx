@@ -12,24 +12,23 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-// Categories for income and expenses
 const incomeCategories = [
-  "Salary",
+  "Gaji",
   "Freelance",
-  "Investment",
-  "Business",
-  "Other",
+  "Investasi",
+  "Bisnis",
+  "Lainnya",
 ];
 const expenseCategories = [
-  "Food",
-  "Transport",
-  "Rent",
-  "Utilities",
-  "Entertainment",
-  "Shopping",
-  "Healthcare",
-  "Education",
-  "Other",
+  "Makanan",
+  "Transportasi",
+  "Sewa",
+  "Tagihan",
+  "Hiburan",
+  "Belanja",
+  "Kesehatan",
+  "Pendidikan",
+  "Lainnya",
 ];
 
 interface AddTransactionProps {
@@ -60,23 +59,23 @@ export default function AddTransaction({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="type">Transaction Type</Label>
+        <Label htmlFor="type">Jenis Transaksi</Label>
         <Select
           value={formData.type}
           onValueChange={(value) => handleInputChange("type", value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select type" />
+            <SelectValue placeholder="Pilih jenis" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="income">Income</SelectItem>
-            <SelectItem value="expense">Expense</SelectItem>
+            <SelectItem value="income">Pemasukan</SelectItem>
+            <SelectItem value="expense">Pengeluaran</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="amount">Amount</Label>
+        <Label htmlFor="amount">Jumlah</Label>
         <div className="relative">
           <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -93,14 +92,14 @@ export default function AddTransaction({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">Category</Label>
+        <Label htmlFor="category">Kategori</Label>
         <Select
           value={formData.category}
           onValueChange={(value) => handleInputChange("category", value)}
           disabled={!formData.type}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="Pilih kategori" />
           </SelectTrigger>
           <SelectContent>
             {getAvailableCategories().map((category) => (
@@ -113,12 +112,12 @@ export default function AddTransaction({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">Deskripsi</Label>
         <div className="relative">
           <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Textarea
             id="description"
-            placeholder="Enter transaction description"
+            placeholder="Masukkan deskripsi transaksi"
             value={formData.description}
             onChange={(e) => handleInputChange("description", e.target.value)}
             className="pl-10"
@@ -128,7 +127,7 @@ export default function AddTransaction({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
+        <Label htmlFor="date">Tanggal</Label>
         <div className="relative">
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -148,14 +147,14 @@ export default function AddTransaction({
           onClick={() => setIsDialogOpen(false)}
           className="cursor-pointer"
         >
-          Cancel
+          Batal
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting}
           className="cursor-pointer"
         >
-          {isSubmitting ? "Adding..." : "Add Transaction"}
+          {isSubmitting ? "Menambahkan..." : "Tambah Transaksi"}
         </Button>
       </div>
     </form>

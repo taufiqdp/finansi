@@ -4,7 +4,6 @@ import { getTransactionsByUserId } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
-// Type for component props
 type ComponentTransaction = {
   id: string;
   type: "income" | "expense";
@@ -19,10 +18,8 @@ export default async function Dashboard() {
   let error: string | null = null;
 
   try {
-    // Fetch transactions for user ID 1
     const apiTransactions = await getTransactionsByUserId(1);
 
-    // Transform API transactions to component format
     transactions = apiTransactions.map((transaction) => ({
       id: transaction.id.toString(),
       type: transaction.type,
@@ -38,7 +35,7 @@ export default async function Dashboard() {
 
   if (error) {
     return (
-      <Sidebar header="Financial Assistant" description="Manage your finances">
+      <Sidebar header="Asisten Keuangan" description="Kelola keuangan Anda">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="text-red-500 text-lg mb-2">⚠️ Error</div>
@@ -50,7 +47,7 @@ export default async function Dashboard() {
   }
 
   return (
-    <Sidebar header="Financial Assistant" description="Manage your finances">
+    <Sidebar header="Asisten Keuangan" description="Kelola keuangan Anda">
       <Overview transactions={transactions} />
     </Sidebar>
   );
