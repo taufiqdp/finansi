@@ -14,6 +14,12 @@ export type Transaction = {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
+if (!API_BASE_URL) {
+  throw new Error(
+    "NEXT_PUBLIC_API_BASE_URL is not defined. Please set it in your environment variables."
+  );
+}
+
 export async function getTransactionsByUserId(
   userId: number
 ): Promise<Transaction[]> {
@@ -104,4 +110,31 @@ export async function deleteTransaction(transactionId: number): Promise<void> {
     console.error("Error deleting transaction:", error);
     throw new Error("Failed to delete transaction");
   }
+}
+
+type SendMessagePayload = {
+  user_id: string;
+  session_id: string | string[] | undefined;
+  new_message: {
+    parts: { text: string }[];
+    role: "user";
+  };
+  streaming: boolean;
+};
+
+export async function sendChatMessage(payload: SendMessagePayload) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/run`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data;
 }

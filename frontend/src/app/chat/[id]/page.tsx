@@ -2,7 +2,6 @@
 
 import type React from "react";
 import { useParams } from "next/navigation";
-
 import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,10 +10,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, Send, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/sidebar";
+import { sendChatMessage } from "@/lib/actions";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
-type MessageRole = "user" | "assistant" | "system";
+type MessageRole = "user" | "model";
 type MessagePart = {
   text?: string;
   functionCall?: unknown;
@@ -39,7 +37,6 @@ export default function FinancialChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
@@ -53,7 +50,6 @@ export default function FinancialChat() {
     e.preventDefault();
     if (!input.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       role: "user",
@@ -62,15 +58,14 @@ export default function FinancialChat() {
       timestamp: Date.now(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-
-    // Add loading message for assistant
     const loadingId = `assistant-${Date.now()}`;
+
     setMessages((prev) => [
       ...prev,
+      userMessage,
       {
         id: loadingId,
-        role: "assistant",
+        role: "model",
         parts: [],
         content: "",
         timestamp: Date.now(),
@@ -82,70 +77,38 @@ export default function FinancialChat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/run`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const data = await sendChatMessage({
+        user_id: "1",
+        session_id: chatId,
+        new_message: {
+          parts: [{ text: input }],
+          role: "user",
         },
-        body: JSON.stringify({
-          user_id: "1",
-          session_id: chatId,
-          new_message: {
-            parts: [{ text: input }],
-            role: "user",
-          },
-          streaming: false,
-        }),
+        streaming: false,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
 
       let assistantMessage: Message = {
         id: loadingId,
-        role: "assistant",
+        role: "model",
         parts: [],
         content: "",
         timestamp: Date.now(),
         loading: false,
       };
 
-      if (Array.isArray(data)) {
-        for (const message of data) {
-          if (message.content && message.content.parts) {
-            for (const part of message.content.parts) {
-              if (part.text) {
-                assistantMessage = {
-                  ...assistantMessage,
-                  content: part.text,
-                  parts: [...assistantMessage.parts, part],
-                };
-              } else if (part.functionCall || part.functionResponse) {
-                assistantMessage = {
-                  ...assistantMessage,
-                  parts: [...assistantMessage.parts, part],
-                };
-              }
-            }
-          }
-        }
-      } else if (data.content && data.content.parts) {
-        for (const part of data.content.parts) {
-          if (part.text) {
-            assistantMessage = {
-              ...assistantMessage,
-              content: part.text,
-              parts: [...assistantMessage.parts, part],
-            };
-          } else if (part.functionCall || part.functionResponse) {
-            assistantMessage = {
-              ...assistantMessage,
-              parts: [...assistantMessage.parts, part],
-            };
-          }
+      const parts = Array.isArray(data)
+        ? data.flatMap((d) => d.content?.parts || [])
+        : data.content?.parts || [];
+
+      for (const part of parts) {
+        if (part.text) {
+          assistantMessage = {
+            ...assistantMessage,
+            content: assistantMessage.content + part.text,
+            parts: [...assistantMessage.parts, part],
+          };
+        } else {
+          assistantMessage.parts.push(part);
         }
       }
 
@@ -189,7 +152,7 @@ export default function FinancialChat() {
                       message.role === "user" ? "justify-end" : "justify-start"
                     )}
                   >
-                    {message.role === "assistant" && (
+                    {message.role === "model" && (
                       <Avatar className="h-8 w-8 flex-shrink-0">
                         <AvatarFallback className="bg-primary text-primary-foreground">
                           <Bot className="h-4 w-4" />
@@ -214,12 +177,12 @@ export default function FinancialChat() {
                           </div>
                           {message.parts.some((part) => part.functionCall) && (
                             <span className="text-xs">
-                              Menjalankan kueri basis data...
+                              Mengambil informasi...
                             </span>
                           )}
                         </div>
                       ) : (
-                        <div className="whitespace-pre-wrap">
+                        <div className="whitespace-pre-wrap text-sm">
                           {message.content}
                         </div>
                       )}
