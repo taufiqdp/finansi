@@ -12,6 +12,7 @@ import { Bot, Send, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/sidebar";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 type MessageRole = "user" | "assistant" | "system";
 type MessagePart = {
   text?: string;
@@ -80,11 +81,10 @@ export default function FinancialChat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/v1/run", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/run`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "text/event-stream",
         },
         body: JSON.stringify({
           user_id: "1",
@@ -93,11 +93,15 @@ export default function FinancialChat() {
             parts: [{ text: input }],
             role: "user",
           },
+          streaming: false,
         }),
       });
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("Failed to get reader from response");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
 
       let assistantMessage: Message = {
         id: loadingId,
@@ -108,112 +112,44 @@ export default function FinancialChat() {
         loading: false,
       };
 
-      // Process the stream
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let hasReceivedContent = false;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        // Split by lines and process each complete line
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || ""; // Keep incomplete line in buffer
-
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine || !trimmedLine.startsWith("data: ")) continue;
-
-          try {
-            const jsonStr = trimmedLine.slice(6); // Remove "data: " prefix
-            const data = JSON.parse(jsonStr);
-
-            if (data.content && data.content.parts) {
-              for (const part of data.content.parts) {
-                if (part.functionCall) {
-                  // Function call started
-                  assistantMessage = {
-                    ...assistantMessage,
-                    parts: [...assistantMessage.parts, part],
-                    loading: true,
-                  };
-                  setMessages((prev) =>
-                    prev.map((msg) =>
-                      msg.id === loadingId ? assistantMessage : msg
-                    )
-                  );
-                } else if (part.functionResponse) {
-                  // Function call completed
-                  assistantMessage = {
-                    ...assistantMessage,
-                    parts: [...assistantMessage.parts, part],
-                    loading: false,
-                  };
-                  setMessages((prev) =>
-                    prev.map((msg) =>
-                      msg.id === loadingId ? assistantMessage : msg
-                    )
-                  );
-                } else if (part.text) {
-                  // Text response - replace content for complete responses
-                  hasReceivedContent = true;
-                  assistantMessage = {
-                    ...assistantMessage,
-                    parts: [...assistantMessage.parts],
-                    content: part.text, // Replace instead of append
-                    loading: data.partial || false,
-                  };
-                  setMessages((prev) =>
-                    prev.map((msg) =>
-                      msg.id === loadingId ? assistantMessage : msg
-                    )
-                  );
-                }
-              }
-            }
-          } catch (error) {
-            console.error("Failed to parse JSON line:", trimmedLine, error);
-          }
-        }
-      }
-
-      // Only process remaining buffer if no streaming content was received
-      if (
-        !hasReceivedContent &&
-        buffer.trim() &&
-        buffer.trim().startsWith("data: ")
-      ) {
-        try {
-          const jsonStr = buffer.trim().slice(6);
-          const data = JSON.parse(jsonStr);
-          if (data.content && data.content.parts) {
-            for (const part of data.content.parts) {
+      if (Array.isArray(data)) {
+        for (const message of data) {
+          if (message.content && message.content.parts) {
+            for (const part of message.content.parts) {
               if (part.text) {
                 assistantMessage = {
                   ...assistantMessage,
                   content: part.text,
-                  loading: false,
+                  parts: [...assistantMessage.parts, part],
                 };
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === loadingId ? assistantMessage : msg
-                  )
-                );
+              } else if (part.functionCall || part.functionResponse) {
+                assistantMessage = {
+                  ...assistantMessage,
+                  parts: [...assistantMessage.parts, part],
+                };
               }
             }
           }
-        } catch (error) {
-          console.error("Failed to parse remaining buffer:", error);
+        }
+      } else if (data.content && data.content.parts) {
+        for (const part of data.content.parts) {
+          if (part.text) {
+            assistantMessage = {
+              ...assistantMessage,
+              content: part.text,
+              parts: [...assistantMessage.parts, part],
+            };
+          } else if (part.functionCall || part.functionResponse) {
+            assistantMessage = {
+              ...assistantMessage,
+              parts: [...assistantMessage.parts, part],
+            };
+          }
         }
       }
 
       setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === loadingId ? { ...msg, loading: false } : msg
-        )
+        prev.map((msg) => (msg.id === loadingId ? assistantMessage : msg))
       );
     } catch (error) {
       console.error("Error:", error);
