@@ -12,7 +12,8 @@ import { Bot, Send, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/sidebar";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 type MessageRole = "user" | "assistant" | "system";
 type MessagePart = {
   text?: string;
