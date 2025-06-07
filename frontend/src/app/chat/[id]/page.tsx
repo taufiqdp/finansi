@@ -9,8 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, Send, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Sidebar from "@/components/sidebar";
 import { sendChatMessage } from "@/lib/actions";
+import SidebarLayout from "@/components/sidebar-layout";
 
 type MessageRole = "user" | "model";
 type MessagePart = {
@@ -135,9 +135,10 @@ export default function FinancialChat() {
   };
 
   return (
-    <Sidebar
+    <SidebarLayout
       header="Asisten Keuangan"
       description="Tanyakan tentang transaksi, anggaran, dan tujuan keuangan Anda"
+      breadcrumbs={[{ title: "Dashboard", href: "/" }, { title: "Chat" }]}
     >
       <div className="flex flex-col h-full overflow-hidden">
         <div className="flex-1 min-h-0 relative">
@@ -232,6 +233,6 @@ export default function FinancialChat() {
           </form>
         </div>
       </div>
-    </Sidebar>
+    </SidebarLayout>
   );
 }

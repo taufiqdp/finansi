@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
-import Sidebar from "@/components/sidebar";
 import {
   createTransaction,
   deleteTransaction,
@@ -39,6 +38,7 @@ import {
 } from "@/lib/actions";
 import AddTransaction from "@/components/add-transaction";
 import Loading from "@/components/loading";
+import SidebarLayout from "@/components/sidebar-layout";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -196,12 +196,13 @@ export default function TransactionsPage() {
 
   return (
     <>
-      <Sidebar
-        header="Transaksi"
-        description="Kelola pemasukan dan pengeluaran Anda"
+      <SidebarLayout
+        breadcrumbs={[
+          { title: "Dashboard", href: "/" },
+          { title: "Transaksi" },
+        ]}
       >
         <div className="space-y-6">
-          {/* Header with Add Button */}
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold">Riwayat Transaksi</h2>
@@ -363,7 +364,7 @@ export default function TransactionsPage() {
             </CardContent>
           </Card>
         </div>
-      </Sidebar>
+      </SidebarLayout>
       <Toaster />
     </>
   );

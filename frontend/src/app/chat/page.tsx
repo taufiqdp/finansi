@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import Sidebar from "@/components/sidebar";
 import Loading from "@/components/loading";
+import SidebarLayout from "@/components/sidebar-layout";
 
 export default function ChatPage() {
   const router = useRouter();
@@ -16,11 +16,12 @@ export default function ChatPage() {
   }, [router]);
 
   return (
-    <Sidebar
+    <SidebarLayout
       header="Asisten Keuangan"
       description="Tanyakan tentang transaksi, anggaran, dan tujuan keuangan Anda"
+      breadcrumbs={[{ title: "Dashboard", href: "/" }, { title: "Chat" }]}
     >
       <Loading description="Memuat..." />
-    </Sidebar>
+    </SidebarLayout>
   );
 }

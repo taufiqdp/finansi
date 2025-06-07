@@ -1,5 +1,5 @@
 import { Overview } from "@/components/overview";
-import Sidebar from "@/components/sidebar";
+import SidebarLayout from "@/components/sidebar-layout";
 import { getTransactionsByUserId } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
@@ -35,20 +35,20 @@ export default async function Dashboard() {
 
   if (error) {
     return (
-      <Sidebar header="Asisten Keuangan" description="Kelola keuangan Anda">
+      <SidebarLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="text-red-500 text-lg mb-2">⚠️ Error</div>
             <p className="text-gray-600">{error}</p>
           </div>
         </div>
-      </Sidebar>
+      </SidebarLayout>
     );
   }
 
   return (
-    <Sidebar header="Asisten Keuangan" description="Kelola keuangan Anda">
+    <SidebarLayout breadcrumbs={[{ title: "Dashboard" }]}>
       <Overview transactions={transactions} />
-    </Sidebar>
+    </SidebarLayout>
   );
 }
