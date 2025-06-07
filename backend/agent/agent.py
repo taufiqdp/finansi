@@ -1,8 +1,9 @@
 from dotenv import load_dotenv
-from financial_agent.prompt import get_prompt
-from financial_agent.tools import execute_sql_query, get_balance
 from google.adk.agents import Agent
 from google.adk.models.lite_llm import LiteLlm
+
+from agent.prompt import get_prompt
+from agent.tools import execute_sql_query, get_balance
 
 load_dotenv()
 
