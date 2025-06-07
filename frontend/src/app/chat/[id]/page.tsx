@@ -140,8 +140,8 @@ export default function FinancialChat() {
       description="Tanyakan tentang transaksi, anggaran, dan tujuan keuangan Anda"
       breadcrumbs={[{ title: "Dashboard", href: "/" }, { title: "Chat" }]}
     >
-      <div className="flex flex-col h-full overflow-hidden">
-        <div className="flex-1 min-h-0 relative">
+      <div className="flex flex-col h-[calc(100vh-170px)] overflow-hidden">
+        <div className="flex-1 min-h-0">
           <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
             <div className="p-4">
               <div className="space-y-6 max-w-3xl mx-auto">
@@ -204,7 +204,7 @@ export default function FinancialChat() {
           </ScrollArea>
         </div>
 
-        <div className="p-4 border-t bg-background flex-shrink-0">
+        <div className="p-3 border-t bg-background flex-shrink-0">
           <form
             onSubmit={handleSubmit}
             className="flex gap-2 max-w-3xl mx-auto"
@@ -213,7 +213,7 @@ export default function FinancialChat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Tanyakan tentang keuangan Anda..."
-              className="min-h-[50px] max-h-32 resize-none"
+              className="min-h-[40px] max-h-24 resize-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();

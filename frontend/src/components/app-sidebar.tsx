@@ -80,10 +80,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate text-xs">Finansial Asisten</span>
                 </div>
               </Link>
+              {/* Add line */}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
+      <div className="h-[1px] w-ful bg-gray-200" />
 
       <SidebarContent>
         <SidebarGroup>

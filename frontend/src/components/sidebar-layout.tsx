@@ -64,8 +64,8 @@ export default function SidebarLayout({
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {header && (
             <div className="border-b pb-4">
-              <h1 className="text-2xl font-bold tracking-tight">{header}</h1>
-              <p className="text-muted-foreground">{description}</p>
+              <h1 className="text-xl font-bold tracking-tight">{header}</h1>
+              <p className="text-muted-foreground text-sm">{description}</p>
             </div>
           )}
           <div className="flex-1">{children}</div>

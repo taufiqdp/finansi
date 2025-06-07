@@ -205,8 +205,8 @@ export default function TransactionsPage() {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Riwayat Transaksi</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-xl font-bold">Riwayat Transaksi</h2>
+              <p className="text-muted-foreground text-sm">
                 Lacak semua aktivitas keuangan Anda
               </p>
             </div>
