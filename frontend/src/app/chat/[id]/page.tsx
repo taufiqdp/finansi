@@ -9,24 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, Send, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { sendChatMessage } from "@/lib/actions";
+import { getSession, Message, Response, sendChatMessage } from "@/lib/actions";
 import SidebarLayout from "@/components/sidebar-layout";
 import ReactMarkdown from "react-markdown";
-
-type MessageRole = "user" | "model";
-type MessagePart = {
-  text?: string;
-  functionCall?: unknown;
-  functionResponse?: unknown;
-};
-type Message = {
-  id: string;
-  role: MessageRole;
-  parts: MessagePart[];
-  content: string;
-  timestamp: number;
-  loading?: boolean;
-};
 
 export default function FinancialChat() {
   const params = useParams();
@@ -46,6 +31,38 @@ export default function FinancialChat() {
       });
     }
   }, [messages]);
+
+  useEffect(() => {
+    const fecthSession = async () => {
+      try {
+        const session = await getSession(chatId as string);
+        if (session && session.length > 0) {
+          const filteredEvents = session.filter((event) => {
+            return !event.content.parts.some(
+              (part) => part.functionCall || part.functionResponse
+            );
+          });
+
+          const initialMessages: Message[] = filteredEvents.map((event) => ({
+            id: event.id,
+            role: event.content.role,
+            parts: event.content.parts,
+            content: event.content.parts
+              .map((part) => part.text || "")
+              .join(""),
+            timestamp: event.timestamp,
+          }));
+
+          setMessages(initialMessages);
+        } else {
+          setMessages([]);
+        }
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      }
+    };
+    fecthSession();
+  }, [chatId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,19 +117,6 @@ export default function FinancialChat() {
       const responses = Array.isArray(data) ? data : [data];
 
       // Find the last response that contains actual text (not function calls)
-      interface ContentPart {
-        text?: string;
-      }
-
-      interface ResponseContent {
-        role: MessageRole;
-        parts: ContentPart[];
-      }
-
-      interface Response {
-        content: ResponseContent;
-      }
-
       const finalResponse = responses
         .filter(
           (response): response is Response => response.content?.role === "model"

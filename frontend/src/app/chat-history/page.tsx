@@ -1,26 +1,45 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Loading from "@/components/loading";
 import SidebarLayout from "@/components/sidebar-layout";
+import ChatHistoryCards from "@/components/chat-history-cards";
+import { ChatSession, getChatHistory } from "@/lib/actions";
 
 export default function ChatHistoryPage() {
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchChatHistory() {
+      try {
+        setLoading(true);
+        const history = await getChatHistory();
+        setChatHistory(history);
+      } catch (err) {
+        console.error("Error fetching chat history:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchChatHistory();
+  }, []);
+
   return (
     <SidebarLayout
-      header="Chat History"
-      description=""
+      header="Riwayat Chat"
+      description={`${chatHistory.length} percakapan tersimpan`}
       breadcrumbs={[
         { title: "Dashboard", href: "/" },
-        { title: "Chat", href: "chat" },
-        { title: "Chat History" },
+        { title: "Riwayat Chat", href: "/chat-history" },
       ]}
     >
-      <div className="p-6">
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-          <h2 className="text-lg font-medium text-gray-600 mb-2">
-            Chat History Feature Coming Soon
-          </h2>
-          <p className="text-gray-500">
-            View and manage your previous conversations here.
-          </p>
-        </div>
-      </div>
+      {loading ? (
+        <Loading description="Memuat histori" />
+      ) : (
+        <ChatHistoryCards chatHistory={chatHistory} />
+      )}
     </SidebarLayout>
   );
 }
