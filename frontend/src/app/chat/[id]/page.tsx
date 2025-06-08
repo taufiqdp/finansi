@@ -11,6 +11,7 @@ import { Bot, Send, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendChatMessage } from "@/lib/actions";
 import SidebarLayout from "@/components/sidebar-layout";
+import ReactMarkdown from "react-markdown";
 
 type MessageRole = "user" | "model";
 type MessagePart = {
@@ -95,19 +96,45 @@ export default function FinancialChat() {
         loading: false,
       };
 
-      const parts = Array.isArray(data)
-        ? data.flatMap((d) => d.content?.parts || [])
-        : data.content?.parts || [];
+      // Filter to get only the final text response from the agent
+      const responses = Array.isArray(data) ? data : [data];
 
-      for (const part of parts) {
-        if (part.text) {
-          assistantMessage = {
-            ...assistantMessage,
-            content: assistantMessage.content + part.text,
-            parts: [...assistantMessage.parts, part],
-          };
-        } else {
-          assistantMessage.parts.push(part);
+      // Find the last response that contains actual text (not function calls)
+      interface ContentPart {
+        text?: string;
+      }
+
+      interface ResponseContent {
+        role: MessageRole;
+        parts: ContentPart[];
+      }
+
+      interface Response {
+        content: ResponseContent;
+      }
+
+      const finalResponse = responses
+        .filter(
+          (response): response is Response => response.content?.role === "model"
+        )
+        .reverse()
+        .find((response) =>
+          response.content?.parts?.some((part) => part.text && part.text.trim())
+        );
+
+      if (finalResponse?.content?.parts) {
+        const textParts = finalResponse.content.parts.filter(
+          (part) => part.text
+        );
+
+        for (const part of textParts) {
+          if (part.text) {
+            assistantMessage = {
+              ...assistantMessage,
+              content: assistantMessage.content + part.text,
+              parts: [...assistantMessage.parts, part],
+            };
+          }
         }
       }
 
@@ -143,7 +170,7 @@ export default function FinancialChat() {
         <div className="flex-1 min-h-0">
           <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
             <div className="p-4">
-              <div className="space-y-6 max-w-3xl mx-auto">
+              <div className="space-y-6 sm:max-w-4xl mx-auto">
                 {messages.map((message) => (
                   <div
                     key={message.id}
@@ -182,8 +209,61 @@ export default function FinancialChat() {
                           )}
                         </div>
                       ) : (
-                        <div className="whitespace-pre-wrap text-sm">
-                          {message.content}
+                        <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                          <ReactMarkdown
+                            components={{
+                              p: ({ children }) => (
+                                <p className="mb-2 last:mb-0">{children}</p>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className="font-semibold">
+                                  {children}
+                                </strong>
+                              ),
+                              ol: ({ children }) => (
+                                <ol className="list-decimal ml-4 space-y-1 mb-2">
+                                  {children}
+                                </ol>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className="list-disc ml-4 space-y-1 mb-2">
+                                  {children}
+                                </ul>
+                              ),
+                              li: ({ children }) => (
+                                <li className="leading-relaxed mb-2">
+                                  {children}
+                                </li>
+                              ),
+                              h1: ({ children }) => (
+                                <h1 className="text-lg font-bold mb-2">
+                                  {children}
+                                </h1>
+                              ),
+                              h2: ({ children }) => (
+                                <h2 className="text-base font-bold mb-2">
+                                  {children}
+                                </h2>
+                              ),
+                              h3: ({ children }) => (
+                                <h3 className="text-sm font-bold mb-2">
+                                  {children}
+                                </h3>
+                              ),
+                              code: ({ children }) => (
+                                <code className="py-0.5 rounded text-xs my-2 bg-muted">
+                                  {children}
+                                </code>
+                              ),
+                              pre: ({ children }) => (
+                                <pre className="bg-muted p-2 rounded text-xs overflow-auto mb-2">
+                                  {children}
+                                </pre>
+                              ),
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
                         </div>
                       )}
                     </div>
