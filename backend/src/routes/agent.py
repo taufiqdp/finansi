@@ -17,7 +17,6 @@ APP_NAME = os.getenv("APP_NAME")
 
 
 class AgentRunRequest(BaseModel):
-    user_id: str
     session_id: str
     new_message: types.Content
     streaming: bool = True
@@ -29,18 +28,18 @@ session_service = DatabaseSessionService(db_url=DATABASE_URL)
 
 @router.post("/run")
 async def agent_run(req: AgentRunRequest):
-    root_agent = get_agent(user_id=req.user_id)
+    root_agent = get_agent()
     runner = Runner(
         app_name=APP_NAME, agent=root_agent, session_service=session_service
     )
 
     session = await runner.session_service.get_session(
-        app_name=APP_NAME, user_id=req.user_id, session_id=req.session_id
+        app_name=APP_NAME, user_id=1, session_id=req.session_id
     )
 
     if not session:
         session = await runner.session_service.create_session(
-            app_name=APP_NAME, user_id=req.user_id, session_id=req.session_id
+            app_name=APP_NAME, user_id=1, session_id=req.session_id
         )
 
     if req.streaming:
@@ -48,7 +47,7 @@ async def agent_run(req: AgentRunRequest):
 
         async def event_generator():
             async for event in runner.run_async(
-                user_id=req.user_id,
+                user_id=1,
                 session_id=req.session_id,
                 new_message=req.new_message,
                 run_config=config,
@@ -66,7 +65,7 @@ async def agent_run(req: AgentRunRequest):
         events = [
             event
             async for event in runner.run_async(
-                user_id=req.user_id,
+                user_id=1,
                 session_id=req.session_id,
                 new_message=req.new_message,
             )

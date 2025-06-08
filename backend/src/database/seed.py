@@ -15,7 +15,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 sample_transactions = [
     {
-        "userId": 1,
         "type": TransactionType.income,
         "amount": 7500000,
         "description": "Gaji Bulanan",
@@ -24,7 +23,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 1,
         "type": TransactionType.expense,
         "amount": 2500000,
         "description": "Sewa Kost",
@@ -33,7 +31,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 1,
         "type": TransactionType.expense,
         "amount": 350000,
         "description": "Belanja Groceries",
@@ -42,7 +39,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 1,
         "type": TransactionType.expense,
         "amount": 65000,
         "description": "Langganan Netflix",
@@ -51,7 +47,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 1,
         "type": TransactionType.income,
         "amount": 1500000,
         "description": "Freelance Design",
@@ -60,7 +55,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 1,
         "type": TransactionType.expense,
         "amount": 150000,
         "description": "Makan di Warteg",
@@ -69,7 +63,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 1,
         "type": TransactionType.expense,
         "amount": 450000,
         "description": "Tagihan Listrik PLN",
@@ -78,7 +71,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 1,
         "type": TransactionType.expense,
         "amount": 50000,
         "description": "Bensin Motor",
@@ -87,7 +79,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 1,
         "type": TransactionType.income,
         "amount": 800000,
         "description": "Bonus Lebaran",
@@ -96,7 +87,6 @@ sample_transactions = [
         "created_at": datetime.now(),
     },
     {
-        "userId": 2,
         "type": TransactionType.income,
         "amount": 6500000,
         "description": "Gaji Bulanan",

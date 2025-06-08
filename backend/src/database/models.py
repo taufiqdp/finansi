@@ -2,8 +2,8 @@ import enum
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import (Column, DateTime, Enum, Integer, Text, create_engine,
-                        func)
+from sqlalchemy import (BigInteger, Column, DateTime, Enum, Integer, Text,
+                        create_engine, func)
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
@@ -24,9 +24,8 @@ class Transaction(Base):
     __tablename__ = "transactions_table"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    userId = Column("user_id", Integer, nullable=False)
     type = Column(Enum(TransactionType), nullable=False)
-    amount = Column(Integer, nullable=False)
+    amount = Column(BigInteger, nullable=False)
     description = Column(Text, nullable=False)
     category = Column(Text, nullable=False)
     date = Column(DateTime, nullable=False)

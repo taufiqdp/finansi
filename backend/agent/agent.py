@@ -8,13 +8,13 @@ from agent.tools import execute_sql_query, get_balance
 load_dotenv()
 
 
-def get_agent(user_id: int) -> Agent:
+def get_agent() -> Agent:
     return Agent(
         name="financial_agent",
         model=LiteLlm(model="azure/gpt-4o-mini"),
         tools=[execute_sql_query, get_balance],
-        instruction=get_prompt(user_id=user_id),
+        instruction=get_prompt(),
     )
 
 
-root_agent = get_agent(user_id=1)  # For testing purposes
+root_agent = get_agent()  # For testing purposes

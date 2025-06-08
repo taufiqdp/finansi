@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -8,7 +9,6 @@ router = APIRouter()
 
 
 class TransactionCreate(BaseModel):
-    userId: int
     type: str
     amount: int
     description: str
@@ -17,21 +17,22 @@ class TransactionCreate(BaseModel):
 
 
 @router.get("/transactions")
-async def get_transactions_by_user_id(userId: int, db: Session = Depends(get_db)):
+async def get_transactions(db: Session = Depends(get_db)):
     try:
-        transactions = db.query(Transaction).filter(Transaction.userId == userId).all()
+        transactions = db.query(Transaction).all()
+        if not transactions:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"message": "No transactions found"},
+            )
+
+        return transactions
+
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": str(e)},
         )
-
-    if not transactions:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No transactions found for this user",
-        )
-
-    return transactions
 
 
 @router.post("/transactions")
@@ -40,7 +41,6 @@ async def create_transaction(
 ):
     try:
         new_transaction = Transaction(
-            userId=transaction.userId,
             type=transaction.type,
             amount=transaction.amount,
             description=transaction.description,
@@ -50,10 +50,14 @@ async def create_transaction(
         db.add(new_transaction)
         db.commit()
         db.refresh(new_transaction)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-    return new_transaction
+        return new_transaction
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": str(e)},
+        )
 
 
 @router.delete("/transactions/{transaction_id}")
@@ -63,24 +67,19 @@ async def delete_transaction(transaction_id: int, db: Session = Depends(get_db))
             db.query(Transaction).filter(Transaction.id == transaction_id).first()
         )
 
-        print(f"Deleting transaction with ID: {transaction_id}")
-        print(f"Transaction found: {transaction}")
-
         if not transaction:
             print(f"Transaction with ID {transaction_id} not found")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found"
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"message": "Transaction not found"},
             )
 
         db.delete(transaction)
         db.commit()
-
-    except HTTPException:
-        raise
+        return {"detail": "Transaction deleted successfully"}
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": str(e)},
         )
-
-    return {"detail": "Transaction deleted successfully"}
