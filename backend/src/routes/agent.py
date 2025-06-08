@@ -98,5 +98,5 @@ async def get_session(session_id: str):
             status_code=404,
             content={"message": f"Session with ID {session_id} not found"},
         )
-
-    return session
+    
+    return session.events

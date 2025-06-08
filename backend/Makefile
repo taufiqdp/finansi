@@ -14,3 +14,6 @@ seed:
 
 test:
 	uv run pytest --cache-clear
+
+dev:
+	uv run uvicorn server:app --reload
