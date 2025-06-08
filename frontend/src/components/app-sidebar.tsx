@@ -7,7 +7,7 @@ import {
   ChevronRight,
   MessageSquare,
   History,
-  User,
+  Heart,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,7 +19,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -30,6 +29,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 
 // Navigation data
@@ -139,21 +139,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/profile">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent">
-                  <User className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">John Doe</span>
-                  <span className="truncate text-xs">john@example.com</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="p-4 text-center">
+          <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+            <span>Made with</span>
+            <Heart className="size-3 fill-red-500 text-red-500" />
+            <span>
+              by{" "}
+              <a
+                href="https://www.linkedin.com/in/taufiqdp/"
+                className="hover:underline"
+                target="_blank"
+              >
+                Taufiq
+              </a>
+            </span>
+          </div>
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
