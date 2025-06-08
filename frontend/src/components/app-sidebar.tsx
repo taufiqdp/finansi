@@ -8,9 +8,9 @@ import {
   MessageSquare,
   History,
   User,
-  Wallet,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Collapsible,
   CollapsibleContent,
@@ -72,8 +72,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Wallet className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Image
+                    src="/icon/icon.png"
+                    alt="FinanSi Logo"
+                    width={32}
+                    height={32}
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">FinanSi</span>

@@ -33,7 +33,7 @@ import { Toaster } from "@/components/ui/sonner";
 import {
   createTransaction,
   deleteTransaction,
-  getTransactionsByUserId,
+  getTransactions,
   Transaction,
 } from "@/lib/actions";
 import AddTransaction from "@/components/add-transaction";
@@ -73,7 +73,7 @@ export default function TransactionsPage() {
   const loadTransactions = async () => {
     try {
       setLoading(true);
-      const data = await getTransactionsByUserId(1);
+      const data = await getTransactions();
       setTransactions(data);
     } catch (error) {
       console.error("Failed to load transactions:", error);
@@ -147,7 +147,6 @@ export default function TransactionsPage() {
 
     try {
       await createTransaction({
-        userId: 1,
         type: formData.type,
         amount: parseFloat(formData.amount),
         category: formData.category,

@@ -78,7 +78,6 @@ export default function FinancialChat() {
 
     try {
       const data = await sendChatMessage({
-        user_id: "1",
         session_id: chatId,
         new_message: {
           parts: [{ text: input }],

@@ -1,6 +1,6 @@
 import { Overview } from "@/components/overview";
 import SidebarLayout from "@/components/sidebar-layout";
-import { getTransactionsByUserId } from "@/lib/actions";
+import { getTransactions } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export default async function Dashboard() {
   let error: string | null = null;
 
   try {
-    const apiTransactions = await getTransactionsByUserId(1);
+    const apiTransactions = await getTransactions();
 
     transactions = apiTransactions.map((transaction) => ({
       id: transaction.id.toString(),

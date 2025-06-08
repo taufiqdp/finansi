@@ -8,7 +8,6 @@ export type Transaction = {
   description: string;
   date: string;
   created_at: string;
-  userId: number;
 };
 
 const API_BASE_URL =
@@ -20,21 +19,15 @@ if (!API_BASE_URL) {
   );
 }
 
-export async function getTransactionsByUserId(
-  userId: number
-): Promise<Transaction[]> {
+export async function getTransactions(): Promise<Transaction[]> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/transactions?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-        // Add cache control for fresh data
-        cache: "no-store",
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/v1/transactions`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -55,7 +48,6 @@ export async function getTransactionsByUserId(
 }
 
 export async function createTransaction(transaction: {
-  userId: number;
   type: "income" | "expense";
   amount: number;
   description: string;
@@ -113,7 +105,6 @@ export async function deleteTransaction(transactionId: number): Promise<void> {
 }
 
 type SendMessagePayload = {
-  user_id: string;
   session_id: string | string[] | undefined;
   new_message: {
     parts: { text: string }[];

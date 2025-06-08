@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import { getTransactionsByUserId, Transaction } from "@/lib/actions";
+import { getTransactions, Transaction } from "@/lib/actions";
 import Loading from "@/components/loading";
 import Cards from "@/components/cards";
 import TabsAnalytics from "@/components/tabs-analytics";
@@ -18,7 +18,7 @@ export default function AnalyticsPage() {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        const data = await getTransactionsByUserId(1);
+        const data = await getTransactions();
         setTransactions(data);
       } catch (error) {
         console.error("Error fetching transactions:", error);

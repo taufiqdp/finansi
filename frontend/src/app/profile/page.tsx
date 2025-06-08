@@ -41,7 +41,6 @@ export default function ProfilePage() {
       breadcrumbs={breadcrumbs}
     >
       <div className="flex-1 space-y-6 p-6">
-        {/* Profile Header Card */}
         <Card>
           <CardHeader className="pb-4">
             <div className="flex items-center space-x-4">
