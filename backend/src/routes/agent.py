@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from google.adk.agents.run_config import RunConfig, StreamingMode
 from google.adk.cli.utils.common import BaseModel
 from google.adk.runners import Runner
@@ -14,6 +14,7 @@ from agent.agent import get_agent
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 APP_NAME = os.getenv("APP_NAME")
+print(DATABASE_URL)
 
 
 class AgentRunRequest(BaseModel):
@@ -73,3 +74,29 @@ async def agent_run(req: AgentRunRequest):
         ]
 
         return events
+
+
+@router.get("/sessions")
+async def get_sessions():
+    user_id = "1"
+    list_sessions_response = await session_service.list_sessions(
+        app_name=APP_NAME, user_id=user_id
+    )
+
+    return list_sessions_response
+
+
+@router.get("/session/{session_id}")
+async def get_session(session_id: str):
+    user_id = "1"
+    session = await session_service.get_session(
+        app_name=APP_NAME, user_id=user_id, session_id=session_id
+    )
+
+    if not session:
+        return JSONResponse(
+            status_code=404,
+            content={"message": f"Session with ID {session_id} not found"},
+        )
+
+    return session
