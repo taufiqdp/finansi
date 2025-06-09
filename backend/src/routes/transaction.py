@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -13,11 +15,21 @@ class TransactionCreate(BaseModel):
     amount: int
     description: str
     category: str
-    date: str
+    date: datetime
+
+
+class TransactionResponse(BaseModel):
+    id: int
+    type: str
+    amount: int
+    description: str
+    category: str
+    date: datetime
+    created_at: datetime
 
 
 @router.get("/transactions")
-async def get_transactions(db: Session = Depends(get_db)):
+async def get_transactions(db: Session = Depends(get_db)) -> list[TransactionResponse]:
     try:
         transactions = db.query(Transaction).all()
         if not transactions:
