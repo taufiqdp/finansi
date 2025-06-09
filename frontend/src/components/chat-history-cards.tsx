@@ -65,7 +65,7 @@ export default function ChatHistoryCards({
               .sort((a, b) => b.lastUpdateTime - a.lastUpdateTime)
               .map((chat) => (
                 <Card
-                  key={chat.id}
+                  key={chat?.id}
                   className="group border bg-white overflow-hidden"
                 >
                   <CardContent className="p-0">

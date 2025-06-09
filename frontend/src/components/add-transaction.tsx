@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Transaction } from "@/lib/actions";
 
 const incomeCategories = [
   "Gaji",
@@ -35,13 +36,7 @@ interface AddTransactionProps {
   setIsDialogOpen: (open: boolean) => void;
   isSubmitting: boolean;
   handleSubmit: (e: React.FormEvent) => void;
-  formData: {
-    type: "income" | "expense" | "";
-    amount: string;
-    category: string;
-    description: string;
-    date: string;
-  };
+  formData: Transaction;
   handleInputChange: (field: string, value: string) => void;
 }
 

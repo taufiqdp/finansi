@@ -5,22 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { TransactionResponse } from "@/lib/actions";
 import { TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-react";
 
-export type Transaction = {
-  id: string;
-  type: "income" | "expense";
-  amount: number;
-  category: string;
-  description: string;
-  date: string;
-};
-
-interface OverviewProps {
-  transactions: Transaction[];
-}
-
-export function Overview({ transactions }: OverviewProps) {
+export function Overview({
+  transactions,
+}: {
+  transactions: TransactionResponse[];
+}) {
   const totalIncome = transactions
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);

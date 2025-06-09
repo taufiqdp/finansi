@@ -9,7 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, Send, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getSession, Message, Response, sendChatMessage } from "@/lib/actions";
+import {
+  getSession,
+  Event as Message,
+  sendChatMessage,
+  ChatRequest,
+} from "@/lib/actions";
 import SidebarLayout from "@/components/sidebar-layout";
 import ReactMarkdown from "react-markdown";
 
@@ -37,23 +42,14 @@ export default function FinancialChat() {
       try {
         const session = await getSession(chatId as string);
         if (session && session.length > 0) {
+          console.log("Fetched session:", session);
           const filteredEvents = session.filter((event) => {
-            return !event.content.parts.some(
+            return !event.content?.parts?.some(
               (part) => part.functionCall || part.functionResponse
             );
           });
 
-          const initialMessages: Message[] = filteredEvents.map((event) => ({
-            id: event.id,
-            role: event.content.role,
-            parts: event.content.parts,
-            content: event.content.parts
-              .map((part) => part.text || "")
-              .join(""),
-            timestamp: event.timestamp,
-          }));
-
-          setMessages(initialMessages);
+          setMessages(filteredEvents);
         } else {
           setMessages([]);
         }
@@ -67,100 +63,58 @@ export default function FinancialChat() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
+    setIsLoading(true);
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
-      role: "user",
-      parts: [{ text: input }],
-      content: input,
+      content: {
+        parts: [
+          {
+            text: input,
+          },
+        ],
+        role: "user",
+      },
       timestamp: Date.now(),
+      author: "user",
+      invocationId: `invocation-${Date.now()}`,
     };
 
-    const loadingId = `assistant-${Date.now()}`;
-
-    setMessages((prev) => [
-      ...prev,
-      userMessage,
-      {
-        id: loadingId,
-        role: "model",
-        parts: [],
-        content: "",
-        timestamp: Date.now(),
-        loading: true,
-      },
-    ]);
-
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    setIsLoading(true);
 
     try {
-      const data = await sendChatMessage({
-        session_id: chatId,
-        new_message: {
-          parts: [{ text: input }],
-          role: "user",
-        },
+      const events = await sendChatMessage({
+        sessionId: chatId as string,
+        newMessage: userMessage.content as ChatRequest["newMessage"],
         streaming: false,
       });
 
-      let assistantMessage: Message = {
-        id: loadingId,
-        role: "model",
-        parts: [],
-        content: "",
-        timestamp: Date.now(),
-        loading: false,
-      };
-
-      // Filter to get only the final text response from the agent
-      const responses = Array.isArray(data) ? data : [data];
-
-      // Find the last response that contains actual text (not function calls)
-      const finalResponse = responses
-        .filter(
-          (response): response is Response => response.content?.role === "model"
-        )
-        .reverse()
-        .find((response) =>
-          response.content?.parts?.some((part) => part.text && part.text.trim())
+      const filteredEvents = events.filter((event) => {
+        return !event.content?.parts?.some(
+          (part) => part.functionCall || part.functionResponse
         );
-
-      if (finalResponse?.content?.parts) {
-        const textParts = finalResponse.content.parts.filter(
-          (part) => part.text
-        );
-
-        for (const part of textParts) {
-          if (part.text) {
-            assistantMessage = {
-              ...assistantMessage,
-              content: assistantMessage.content + part.text,
-              parts: [...assistantMessage.parts, part],
-            };
-          }
-        }
-      }
-
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === loadingId ? assistantMessage : msg))
-      );
-    } catch (error) {
-      console.error("Error:", error);
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === loadingId
-            ? {
-                ...msg,
-                content:
-                  "Maaf, terjadi kesalahan saat memproses permintaan Anda.",
-                loading: false,
-              }
-            : msg
-        )
-      );
-    } finally {
+      });
+      setMessages((prev) => [...prev, ...filteredEvents]);
       setIsLoading(false);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setIsLoading(false);
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        content: {
+          parts: [
+            {
+              text: "Terjadi kesalahan saat mengirim pesan. Silakan coba lagi.",
+            },
+          ],
+          role: "model",
+        },
+        timestamp: Date.now(),
+        author: "model",
+        invocationId: `invocation-${Date.now()}`,
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     }
   };
 
@@ -180,10 +134,12 @@ export default function FinancialChat() {
                     key={message.id}
                     className={cn(
                       "flex gap-3",
-                      message.role === "user" ? "justify-end" : "justify-start"
+                      message.content?.role === "user"
+                        ? "justify-end"
+                        : "justify-start"
                     )}
                   >
-                    {message.role === "model" && (
+                    {message.content?.role === "model" && (
                       <Avatar className="h-8 w-8 flex-shrink-0">
                         <AvatarFallback className="bg-primary text-primary-foreground">
                           <Bot className="h-4 w-4" />
@@ -194,85 +150,72 @@ export default function FinancialChat() {
                     <div
                       className={cn(
                         "rounded-lg p-4 max-w-[80%] break-words",
-                        message.role === "user"
+                        message.content?.role === "user"
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted"
                       )}
                     >
-                      {message.loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="animate-pulse flex space-x-1">
-                            <div className="h-2 w-2 bg-current rounded-full animate-bounce"></div>
-                            <div className="h-2 w-2 bg-current rounded-full animate-bounce [animation-delay:0.1s]"></div>
-                            <div className="h-2 w-2 bg-current rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                          </div>
-                          {message.parts.some((part) => part.functionCall) && (
-                            <span className="text-xs">
-                              Mengambil informasi...
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
-                          <ReactMarkdown
-                            components={{
-                              p: ({ children }) => (
-                                <p className="mb-2 last:mb-0">{children}</p>
-                              ),
-                              strong: ({ children }) => (
-                                <strong className="font-semibold">
-                                  {children}
-                                </strong>
-                              ),
-                              ol: ({ children }) => (
-                                <ol className="list-decimal ml-4 space-y-1 mb-2">
-                                  {children}
-                                </ol>
-                              ),
-                              ul: ({ children }) => (
-                                <ul className="list-disc ml-4 space-y-1 mb-2">
-                                  {children}
-                                </ul>
-                              ),
-                              li: ({ children }) => (
-                                <li className="leading-relaxed mb-2">
-                                  {children}
-                                </li>
-                              ),
-                              h1: ({ children }) => (
-                                <h1 className="text-lg font-bold mb-2">
-                                  {children}
-                                </h1>
-                              ),
-                              h2: ({ children }) => (
-                                <h2 className="text-base font-bold mb-2">
-                                  {children}
-                                </h2>
-                              ),
-                              h3: ({ children }) => (
-                                <h3 className="text-sm font-bold mb-2">
-                                  {children}
-                                </h3>
-                              ),
-                              code: ({ children }) => (
-                                <code className="py-0.5 rounded text-xs my-2 bg-muted">
-                                  {children}
-                                </code>
-                              ),
-                              pre: ({ children }) => (
-                                <pre className="bg-muted p-2 rounded text-xs overflow-auto mb-2">
-                                  {children}
-                                </pre>
-                              ),
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
-                        </div>
-                      )}
+                      <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => (
+                              <p className="mb-2 last:mb-0">{children}</p>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-semibold">
+                                {children}
+                              </strong>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-decimal ml-4 space-y-1 mb-2">
+                                {children}
+                              </ol>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="list-disc ml-4 space-y-1 mb-2">
+                                {children}
+                              </ul>
+                            ),
+                            li: ({ children }) => (
+                              <li className="leading-relaxed mb-2">
+                                {children}
+                              </li>
+                            ),
+                            h1: ({ children }) => (
+                              <h1 className="text-lg font-bold mb-2">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="text-base font-bold mb-2">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-sm font-bold mb-2">
+                                {children}
+                              </h3>
+                            ),
+                            code: ({ children }) => (
+                              <code className="py-0.5 rounded text-xs my-2 bg-muted">
+                                {children}
+                              </code>
+                            ),
+                            pre: ({ children }) => (
+                              <pre className="bg-muted p-2 rounded text-xs overflow-auto mb-2">
+                                {children}
+                              </pre>
+                            ),
+                          }}
+                        >
+                          {message.content?.parts
+                            ?.map((part) => part.text)
+                            .join("")}
+                        </ReactMarkdown>
+                      </div>
                     </div>
 
-                    {message.role === "user" && (
+                    {message.content?.role === "user" && (
                       <Avatar className="h-8 w-8 flex-shrink-0">
                         <AvatarFallback className="bg-muted">
                           <User className="h-4 w-4" />

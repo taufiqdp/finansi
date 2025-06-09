@@ -1,36 +1,57 @@
+"use client";
+
 import { Overview } from "@/components/overview";
 import SidebarLayout from "@/components/sidebar-layout";
 import { getTransactions } from "@/lib/actions";
+import { useState, useEffect } from "react";
+import type { TransactionResponse } from "@/lib/actions";
 
-export const dynamic = "force-dynamic";
+export default function Dashboard() {
+  const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-type ComponentTransaction = {
-  id: string;
-  type: "income" | "expense";
-  amount: number;
-  category: string;
-  description: string;
-  date: string;
-};
+  useEffect(() => {
+    async function fetchTransactions() {
+      try {
+        setLoading(true);
+        const apiTransactions = await getTransactions();
 
-export default async function Dashboard() {
-  let transactions: ComponentTransaction[] = [];
-  let error: string | null = null;
+        const formattedTransactions = apiTransactions.map((transaction) => ({
+          id: transaction.id,
+          type: transaction.type,
+          amount: transaction.amount,
+          category: transaction.category,
+          description: transaction.description,
+          date: new Date(transaction.date).toISOString().split("T")[0],
+          created_at: new Date(transaction.created_at).toISOString(),
+        }));
 
-  try {
-    const apiTransactions = await getTransactions();
+        setTransactions(formattedTransactions);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch transactions:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load transactions"
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    transactions = apiTransactions.map((transaction) => ({
-      id: transaction.id.toString(),
-      type: transaction.type,
-      amount: transaction.amount,
-      category: transaction.category,
-      description: transaction.description,
-      date: new Date(transaction.date).toISOString().split("T")[0],
-    }));
-  } catch (err) {
-    console.error("Failed to fetch transactions:", err);
-    error = err instanceof Error ? err.message : "Failed to load transactions";
+    fetchTransactions();
+  }, []);
+
+  if (loading) {
+    return (
+      <SidebarLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="text-gray-500 text-lg mb-2">Loading...</div>
+          </div>
+        </div>
+      </SidebarLayout>
+    );
   }
 
   if (error) {

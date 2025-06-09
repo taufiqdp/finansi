@@ -1,82 +1,17 @@
 "use server";
 
-type MessageRole = "user" | "model";
+import { components } from "@/schema/schema";
 
-export type Transaction = {
-  id: number;
-  type: "income" | "expense";
-  amount: number;
-  category: string;
-  description: string;
-  date: string;
-  created_at: string;
-};
+export type Transaction = components["schemas"]["TransactionCreate"];
+export type TransactionResponse = components["schemas"]["TransactionResponse"];
 
-export type MessagePart = {
-  text?: string;
-  functionCall?: unknown;
-  functionResponse?: unknown;
-};
+export type Event = components["schemas"]["Event"];
+export type Content = components["schemas"]["Content-Output"];
 
-export type Message = {
-  id: string;
-  role: "user" | "model";
-  parts: MessagePart[];
-  content: string;
-  timestamp: number;
-  loading?: boolean;
-};
+export type ChatRequest = components["schemas"]["AgentRunRequest"];
+export type PartOutput = components["schemas"]["Part-Output"];
 
-export type SessionEvent = {
-  id: string;
-  content: {
-    parts: MessagePart[];
-    role: "user" | "model";
-  };
-  timestamp: number;
-  author: string;
-};
-
-export type ChatSession = {
-  id: string;
-  appName: string;
-  userId: string;
-  state: Record<string, unknown>;
-  events: SessionEvent[];
-  lastUpdateTime: number;
-};
-
-type ChatHistoryResponse = {
-  sessions: ChatSession[];
-};
-
-type CreateTransactionPayload = {
-  type: "income" | "expense";
-  amount: number;
-  description: string;
-  category: string;
-  date: string;
-};
-
-type SendMessagePayload = {
-  session_id: string | string[] | undefined;
-  new_message: {
-    parts: { text: string }[];
-    role: "user";
-  };
-  streaming: boolean;
-};
-
-interface ResponseContent {
-  role: MessageRole;
-  parts: MessagePart[];
-}
-
-export interface Response {
-  id: string;
-  timestamp: number;
-  content: ResponseContent;
-}
+export type ChatSession = components["schemas"]["Session"];
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
@@ -105,7 +40,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   return response;
 };
 
-export async function getTransactions(): Promise<Transaction[]> {
+export async function getTransactions(): Promise<TransactionResponse[]> {
   try {
     const response = await apiRequest("/api/v1/transactions", {
       cache: "no-store",
@@ -122,8 +57,8 @@ export async function getTransactions(): Promise<Transaction[]> {
 }
 
 export async function createTransaction(
-  transaction: CreateTransactionPayload
-): Promise<Transaction> {
+  transaction: Transaction
+): Promise<TransactionResponse> {
   try {
     const response = await apiRequest("/api/v1/transactions", {
       method: "POST",
@@ -154,7 +89,7 @@ export async function deleteTransaction(transactionId: number): Promise<void> {
   }
 }
 
-export async function sendChatMessage(payload: SendMessagePayload) {
+export async function sendChatMessage(payload: ChatRequest): Promise<Event[]> {
   try {
     const response = await apiRequest("/api/v1/run", {
       method: "POST",
@@ -174,15 +109,15 @@ export async function sendChatMessage(payload: SendMessagePayload) {
 export async function getChatHistory(): Promise<ChatSession[]> {
   try {
     const response = await apiRequest("/api/v1/sessions");
-    const data: ChatHistoryResponse = await response.json();
-    return data.sessions;
+    const data: ChatSession[] = await response.json();
+    return data;
   } catch (error) {
     console.error("Error fetching chat history:", error);
     throw new Error("Failed to fetch chat history from server");
   }
 }
 
-export async function getSession(chatId: string): Promise<Response[]> {
+export async function getSession(chatId: string): Promise<Event[]> {
   const response = await apiRequest(`/api/v1/session/${chatId}`);
   if (!response.ok) {
     return [];

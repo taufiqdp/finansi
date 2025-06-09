@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import { getTransactions, Transaction } from "@/lib/actions";
+import { getTransactions, TransactionResponse } from "@/lib/actions";
 import Loading from "@/components/loading";
 import Cards from "@/components/cards";
 import TabsAnalytics from "@/components/tabs-analytics";
 import SidebarLayout from "@/components/sidebar-layout";
 
 export default function AnalyticsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

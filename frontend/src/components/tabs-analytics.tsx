@@ -1,4 +1,4 @@
-import { Transaction } from "@/lib/actions";
+import { TransactionResponse } from "@/lib/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -13,7 +13,7 @@ import { formatCurrency } from "@/lib/utils";
 export default function TabsAnalytics({
   transactions,
 }: {
-  transactions: Transaction[];
+  transactions: TransactionResponse[];
 }) {
   const totalIncome = transactions
     .filter((t) => t.type === "income")

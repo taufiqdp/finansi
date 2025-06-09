@@ -35,6 +35,7 @@ import {
   deleteTransaction,
   getTransactions,
   Transaction,
+  TransactionResponse,
 } from "@/lib/actions";
 import AddTransaction from "@/components/add-transaction";
 import Loading from "@/components/loading";
@@ -49,7 +50,7 @@ const formatCurrency = (amount: number) => {
 };
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,12 +59,12 @@ export default function TransactionsPage() {
     direction: "asc" | "desc";
   }>({ key: "date", direction: "desc" });
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Transaction>({
     type: "" as "income" | "expense" | "",
-    amount: "",
+    amount: 0,
     category: "",
     description: "",
-    date: new Date().toISOString().split("T")[0],
+    date: new Date().toISOString().split("T")[0], // Default to today
   });
 
   useEffect(() => {
@@ -148,7 +149,7 @@ export default function TransactionsPage() {
     try {
       await createTransaction({
         type: formData.type,
-        amount: parseFloat(formData.amount),
+        amount: formData.amount,
         category: formData.category,
         description: formData.description,
         date: formData.date,
@@ -158,7 +159,7 @@ export default function TransactionsPage() {
 
       setFormData({
         type: "" as "income" | "expense" | "",
-        amount: "",
+        amount: 0,
         category: "",
         description: "",
         date: new Date().toISOString().split("T")[0],
