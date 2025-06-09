@@ -32,7 +32,8 @@ export default function ChatHistoryPage() {
       description={`${chatHistory.length} percakapan tersimpan`}
       breadcrumbs={[
         { title: "Dashboard", href: "/" },
-        { title: "Riwayat Chat", href: "/chat-history" },
+        { title: "Chat", href: "/chat" },
+        { title: "Riwayat Chat" },
       ]}
     >
       {loading ? (
