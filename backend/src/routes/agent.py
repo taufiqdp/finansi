@@ -95,4 +95,7 @@ async def get_session(session_id: str) -> List[Event]:
         app_name=APP_NAME, user_id=user_id, session_id=session_id
     )
 
+    if not session:
+        return []
+
     return session.events
