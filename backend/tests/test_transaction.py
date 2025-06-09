@@ -51,7 +51,7 @@ class TestTransactionEndpoints:
         }
 
         response = client.post("/api/v1/transactions", json=transaction_data)
-        assert response.status_code == 500
+        assert response.status_code == 422
 
     def test_create_transaction_negative_amount(self, client: TestClient):
         """Test transaction creation with negative amount"""
