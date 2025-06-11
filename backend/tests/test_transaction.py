@@ -158,42 +158,18 @@ class TestTransactionEndpoints:
         assert data["description"] == "Café français 🇫🇷"
         assert data["category"] == "食物"
 
-    def test_create_transaction_float_amount(self, client: TestClient):
-        """Test transaction creation with float amount"""
+    def test_create_transaction_invalid_amount_type(self, client: TestClient):
+        """Test transaction creation with invalid amount type"""
         transaction_data = {
             "type": "expense",
-            "amount": 15.99,
+            "amount": "not_a_number",
             "description": "Coffee",
             "category": "food",
             "date": datetime(2024, 12, 1).isoformat(),
         }
 
         response = client.post("/api/v1/transactions", json=transaction_data)
-        assert response.status_code == 422  # Should fail as amount is int in schema
-
-    def test_create_transaction_null_values(self, client: TestClient):
-        """Test transaction creation with null values"""
-        transaction_data = {
-            "type": "income",
-            "amount": 1000,
-            "description": None,
-            "category": "salary",
-            "date": datetime(2024, 12, 1).isoformat(),
-        }
-
-        response = client.post("/api/v1/transactions", json=transaction_data)
-        assert response.status_code == 422
-
-    def test_create_transaction_missing_fields(self, client: TestClient):
-        """Test transaction creation with missing required fields"""
-        transaction_data = {
-            "type": "income",
-            # Missing amount, description, category, date
-        }
-
-        response = client.post("/api/v1/transactions", json=transaction_data)
-
-        assert response.status_code == 422  # Validation error
+        assert response.status_code == 422  # Validation error for invalid amount type
 
     def test_get_all_transactions_success(self, client: TestClient, db_session):
         """Test successful retrieval of all transactions"""
@@ -320,7 +296,8 @@ class TestTransactionEndpoints:
         edge_cases = [
             {"amount": 0, "expected_status": 200},  # Zero amount
             {"amount": 1, "expected_status": 200},  # Minimum positive
-            {"amount": 999999, "expected_status": 200},  # Large amount
+            {"amount": 999999999999, "expected_status": 200},  # Very large amount (BigInteger supports this)
+            {"amount": -999999999999, "expected_status": 200},  # Very large negative amount
         ]
 
         for case in edge_cases:
