@@ -24,7 +24,7 @@ class Transaction(Base):
     __tablename__ = "transactions_table"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    type = Column(Enum(TransactionType), nullable=False)
+    type = Column(Enum(TransactionType, name="transaction_type", create_type=False), nullable=False)
     amount = Column(BigInteger, nullable=False)
     description = Column(Text, nullable=False)
     category = Column(Text, nullable=False)
