@@ -14,7 +14,7 @@ export type PartOutput = components["schemas"]["Part-Output"];
 export type ChatSession = components["schemas"]["Session"];
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://backend:8000";
 
 if (!API_BASE_URL) {
   throw new Error(
