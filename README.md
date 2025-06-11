@@ -7,8 +7,8 @@
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/taufiqdp/demo-adk-mcp
-   cd demo-adk-mcp
+   git clone https://github.com/taufiqdp/finansi
+   cd finansi
    ```
 
 2. Rename the `.env.example` file to `.env` and fill in the required environment variables.
