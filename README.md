@@ -14,7 +14,7 @@
 2. Rename the `.env.example` file to `.env` and fill in the required environment variables.
 
    ```bash
-    cp .env.example .env
+    mv .env.example .env
    ```
 
 3. Run the Docker container
